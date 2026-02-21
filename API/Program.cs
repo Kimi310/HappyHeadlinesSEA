@@ -9,7 +9,7 @@ builder.Services.Configure<DatabaseOptions>(
     builder.Configuration.GetSection("ConnectionStrings"));
 
 builder.Services.AddScoped<IArticleDbContextFactory, ArticleDbContextFactory>();
-builder.Services.AddScoped<IArticlerepository, ArticleRepository>();
+builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
 
 var app = builder.Build();
 

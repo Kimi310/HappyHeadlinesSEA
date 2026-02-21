@@ -17,19 +17,13 @@ services:
     image: mcr.microsoft.com/mssql-tools
     depends_on:
       - sqlserver
+    volumes:
+      - ./init.sql:/init.sql
     entrypoint: >
       /bin/bash -c "
-      sleep 20 &&
-      /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P YourStrong!Passw0rd -Q '
-      CREATE DATABASE EuropeDB;
-      CREATE DATABASE AsiaDB;
-      CREATE DATABASE AfricaDB;
-      CREATE DATABASE NorthAmericaDB;
-      CREATE DATABASE SouthAmericaDB;
-      CREATE DATABASE AustraliaDB;
-      CREATE DATABASE AntarcticaDB;
-      CREATE DATABASE GlobalDB;
-      '"
+      sleep 25 &&
+      /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P YourStrong!Passw0rd -i /init.sql
+      "
 
 volumes:
   sqlvolume:

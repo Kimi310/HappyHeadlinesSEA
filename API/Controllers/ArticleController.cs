@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Services.Dtos.ResponseDtos;
+﻿using DataAccess.Models;
+using Microsoft.AspNetCore.Mvc;
 using Services.Interfaces;
 
 namespace HappyHeadlines.Controllers;
@@ -9,9 +9,10 @@ namespace HappyHeadlines.Controllers;
 public class ArticleController(IArticleService articleService) : ControllerBase
 {
     [HttpGet]
-    public async Task<List<ArticleResponseDto>> GetArticles()
+    [Route("get/{region}")]
+    public async Task<List<Article>> GetArticlesFromRegion([FromRoute]  string region)
     {
-        var response = await articleService.GetArticles();
+        var response = await articleService.GetArticlesFromRegion(region);
         return response;
     }
 }
