@@ -1,0 +1,35 @@
+﻿version: '3.8'
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: article-sqlserver
+    environment:
+      SA_PASSWORD: "YourStrong!Passw0rd"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlvolume:/var/opt/mssql
+    restart: always
+
+  db-init:
+    image: mcr.microsoft.com/mssql-tools
+    depends_on:
+      - sqlserver
+    entrypoint: >
+      /bin/bash -c "
+      sleep 20 &&
+      /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P YourStrong!Passw0rd -Q '
+      CREATE DATABASE EuropeDB;
+      CREATE DATABASE AsiaDB;
+      CREATE DATABASE AfricaDB;
+      CREATE DATABASE NorthAmericaDB;
+      CREATE DATABASE SouthAmericaDB;
+      CREATE DATABASE AustraliaDB;
+      CREATE DATABASE AntarcticaDB;
+      CREATE DATABASE GlobalDB;
+      '"
+
+volumes:
+  sqlvolume:
