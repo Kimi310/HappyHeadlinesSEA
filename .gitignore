@@ -34,6 +34,9 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
+API/obj
+DataAccess/obj
+Service/obj
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
