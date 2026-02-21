@@ -15,4 +15,19 @@ public class ArticleController(IArticleService articleService) : ControllerBase
         var response = await articleService.GetArticlesFromRegion(region);
         return response;
     }
+
+    [HttpPost]
+    [Route("add")]
+    public async Task<Article> AddArticle([FromBody] Article article)
+    {
+        var response = await articleService.AddArticle(article);
+        return response;
+    }
+    
+    [HttpDelete]
+    [Route("delete/{region}/{id}")]
+    public async Task DeleteArticle([FromRoute] string region, [FromRoute] Guid id)
+    {
+        await articleService.RemoveArticle(id,region);
+    }
 }

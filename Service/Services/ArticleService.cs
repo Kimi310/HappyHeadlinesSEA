@@ -11,4 +11,14 @@ public class ArticleService(IArticleRepository articleRepository) : IArticleServ
         return await articleRepository.GetFromRegionAsync(region);
     }
 
+    public async Task<Article> AddArticle(Article article)
+    {
+        return await articleRepository.CreateAsync(article);
+    }
+    
+    public async Task RemoveArticle(Guid id, string region)
+    {
+        var article = await articleRepository.GetByIdAsync(id, region);
+        await articleRepository.DeleteAsync(article);
+    }
 }

@@ -13,10 +13,18 @@ public class ArticleRepository : IArticleRepository
         _factory = factory;
     }
 
-    public async Task CreateAsync(Article article)
+    public async Task<Article> CreateAsync(Article article)
     {
         var context = _factory.Create(article.Continent, article.IsGlobal);
         context.Articles.Add(article);
+        await context.SaveChangesAsync();
+        return article;
+    }
+
+    public async Task DeleteAsync(Article article)
+    {
+        var context = _factory.Create(article.Continent, article.IsGlobal);
+        context.Articles.Remove(article);
         await context.SaveChangesAsync();
     }
 
@@ -30,5 +38,17 @@ public class ArticleRepository : IArticleRepository
         
         var context = _factory.Create(region, isGlobal);
         return await context.Articles.ToListAsync();
+    }
+
+    public async Task<Article> GetByIdAsync(Guid id, string region)
+    {
+        var isGlobal = false;
+        if (region == "Global")
+        {
+            isGlobal = true;
+        }
+        
+        var context = _factory.Create(region, isGlobal);
+        return await context.Articles.FirstOrDefaultAsync(a => a.Id == id);
     }
 }
