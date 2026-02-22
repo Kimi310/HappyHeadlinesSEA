@@ -30,4 +30,12 @@ public class ArticleController(IArticleService articleService) : ControllerBase
     {
         await articleService.RemoveArticle(id,region);
     }
+
+    [HttpPatch]
+    [Route("update")]
+    public async Task<Article> UpdateArticle([FromBody] Article article)
+    {
+        var response = await articleService.UpdateArticle(article);
+        return response;
+    }
 }
