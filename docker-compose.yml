@@ -12,6 +12,30 @@ services:
     volumes:
       - sqlvolume:/var/opt/mssql
     restart: always
+    
+  sqlserver-comment:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: comment-sqlserver
+    environment:
+      SA_PASSWORD: "YourStrong!Passw0rd"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1434:1434"
+    volumes:
+      - sqlvolume:/var/opt/mssql/comment
+    restart: always
+  
+  sqlserver-profanity:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: profanity-sqlserver
+    environment:
+      SA_PASSWORD: "YourStrong!Passw0rd"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1435:1435"
+    volumes:
+      - sqlvolume:/var/opt/mssql/profanity
+    restart: always
 
   db-init:
     image: mcr.microsoft.com/mssql-tools
@@ -23,6 +47,30 @@ services:
       /bin/bash -c "
       sleep 25 &&
       /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P YourStrong!Passw0rd -i /init.sql
+      "
+
+  db-comment-init:
+    image: mcr.microsoft.com/mssql-tools
+    depends_on:
+      - sqlserver-comment
+    volumes:
+      - ./init.sql:/comment-init.sql
+    entrypoint: >
+      /bin/bash -c "
+      sleep 25 &&
+      /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P YourStrong!Passw0rd -i /comment-init.sql
+      "
+
+  db-profanity-init:
+    image: mcr.microsoft.com/mssql-tools
+    depends_on:
+      - sqlserver-profanity
+    volumes:
+      - ./init.sql:/profanity-init.sql
+    entrypoint: >
+      /bin/bash -c "
+      sleep 25 &&
+      /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P YourStrong!Passw0rd -i /profanity-init.sql
       "
 
   api-1:
