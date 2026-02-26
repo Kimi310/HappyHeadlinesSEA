@@ -13,6 +13,14 @@ public class ArticleRepository : IArticleRepository
         _factory = factory;
     }
 
+    public async Task<Article> UpdateAsync(Article article)
+    {
+        var context = _factory.Create(article.Continent, article.IsGlobal);
+        context.Articles.Update(article);
+        await context.SaveChangesAsync();
+        return article;
+    }
+    
     public async Task<Article> CreateAsync(Article article)
     {
         var context = _factory.Create(article.Continent, article.IsGlobal);
