@@ -10,4 +10,6 @@ public class DatabaseOptions
     public string Australia { get; set; }
     public string Antarctica { get; set; }
     public string Global { get; set; }
+    public string CommentGlobal { get; set; }
+    public string ProfanityGlobal  { get; set; }
 }
