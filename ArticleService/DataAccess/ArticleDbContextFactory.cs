@@ -1,10 +1,8 @@
-﻿using DataAccess.Interfaces;
-
-
-
+﻿using ArticleService.DataAccess.Interfaces;
+using DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-namespace DataAccess;
+namespace ArticleService.DataAccess;
 public class ArticleDbContextFactory : IArticleDbContextFactory
 {
     private readonly DatabaseOptions _dbOptions;
