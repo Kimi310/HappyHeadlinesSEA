@@ -1,4 +1,6 @@
-﻿namespace DataAccess.Interfaces;
+﻿using ArticleService.DataAccess;
+
+namespace ArticleService.DataAccess.Interfaces;
 
 public interface IArticleDbContextFactory
 {

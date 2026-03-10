@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommentService", "CommentSe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProfanityService", "ProfanityService\ProfanityService.csproj", "{34129406-7D3F-4A90-9802-A991D0B8C9C8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArticleService", "ArticleService\ArticleService.csproj", "{5008605F-FE7A-4CEA-8295-5EBA54832C42}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,5 +45,11 @@ Global
 		{34129406-7D3F-4A90-9802-A991D0B8C9C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{34129406-7D3F-4A90-9802-A991D0B8C9C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{34129406-7D3F-4A90-9802-A991D0B8C9C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5008605F-FE7A-4CEA-8295-5EBA54832C42}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5008605F-FE7A-4CEA-8295-5EBA54832C42}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5008605F-FE7A-4CEA-8295-5EBA54832C42}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5008605F-FE7A-4CEA-8295-5EBA54832C42}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection
 EndGlobal

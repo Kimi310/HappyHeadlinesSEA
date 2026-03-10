@@ -1,8 +1,8 @@
-﻿using DataAccess.Interfaces;
+﻿using ArticleService.DataAccess.Interfaces;
 using DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace DataAccess.Repositories;
+namespace ArticleService.DataAccess.Repositories;
 
 public class ArticleRepository : IArticleRepository
 {
