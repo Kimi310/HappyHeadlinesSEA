@@ -1,8 +1,6 @@
-﻿
+﻿using DataAccess.Models;
 
-using DataAccess.Models;
-
-namespace Services.Interfaces;
+namespace ArticleService.Service.Interfaces;
 
 public interface IArticleService
 {

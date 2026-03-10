@@ -1,8 +1,8 @@
-﻿using DataAccess.Interfaces;
+﻿using ArticleService.DataAccess.Interfaces;
+using ArticleService.Service.Interfaces;
 using DataAccess.Models;
-using Services.Interfaces;
 
-namespace Services.Services;
+namespace ArticleService.Service.Services;
 
 public class ArticleService(IArticleRepository articleRepository) : IArticleService
 {
