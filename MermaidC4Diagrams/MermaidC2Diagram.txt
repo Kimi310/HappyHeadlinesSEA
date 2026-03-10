@@ -1,0 +1,129 @@
+﻿flowchart TB
+
+%% USERS
+Publisher["Publisher"]
+Reader["Reader"]
+
+%% SYSTEM
+subgraph HappyHeadlines System
+direction TB
+
+%% FRONTEND
+subgraph Frontend Layer
+direction LR
+Webapp["Webapp<br/>(Write drafts<br/>Publish articles)"]
+Website["Website<br/>(Read<br/>Comment<br/>Subscribe)"]
+end
+
+%% SERVICES
+subgraph Services Layer
+direction LR
+DraftService["DraftService<br/>Logging + Tracing"]
+PublisherService["PublisherService"]
+CommentService["CommentService"]
+ArticleService["ArticleService"]
+SubscriberService["SubscriberService"]
+NewsletterService["NewsletterService"]
+ProfanityService["ProfanityService"]
+end
+
+%% DATA
+subgraph Data Layer
+direction LR
+DraftDB[("DraftDatabase<br/>Query Logging")]
+ArticleDB[("ArticleDatabase")]
+CommentDB[("CommentDatabase")]
+SubscriberDB[("SubscriberDatabase")]
+ProfanityDB[("ProfanityDatabase")]
+ArticleQueue["ArticleQueue"]
+SubscriberQueue["SubscriberQueue"]
+end
+
+%% OBSERVABILITY
+subgraph Observability Platform
+direction LR
+
+LogCollector["Log Collector"]
+TraceCollector["Trace Collector"]
+MetricsCollector["Metrics Collector"]
+
+LogStorage[("Log Storage")]
+TraceStorage[("Trace Storage")]
+MetricsStorage[("Metrics Storage")]
+
+Alerting["Alerting System"]
+LogCleanup["Automated Log Cleanup"]
+
+end
+
+end
+
+%% USER CONNECTIONS
+Publisher ==> Webapp
+Reader ==> Website
+
+%% FRONTEND → SERVICES
+Webapp ==> DraftService
+Webapp ==> PublisherService
+
+Website ==> ArticleService
+Website ==> CommentService
+Website ==> SubscriberService
+
+%% SERVICE RELATIONSHIPS
+PublisherService --> ProfanityService
+CommentService --> ProfanityService
+
+PublisherService --> ArticleQueue
+ArticleService --> ArticleQueue
+
+NewsletterService --> ArticleService
+NewsletterService --> SubscriberService
+
+%% SERVICES → DATA
+DraftService --> DraftDB
+ArticleService --> ArticleDB
+CommentService --> CommentDB
+SubscriberService --> SubscriberDB
+SubscriberService --> SubscriberQueue
+ProfanityService --> ProfanityDB
+
+%% OBSERVABILITY (CENTRALIZED)
+
+DraftService -.-> LogCollector
+PublisherService -.-> LogCollector
+CommentService -.-> LogCollector
+ArticleService -.-> LogCollector
+SubscriberService -.-> LogCollector
+DraftDB -.-> LogCollector
+
+DraftService -.-> TraceCollector
+ArticleService -.-> TraceCollector
+
+DraftService -.-> MetricsCollector
+ArticleService -.-> MetricsCollector
+SubscriberService -.-> MetricsCollector
+
+%% OBSERVABILITY STORAGE
+
+LogCollector --> LogStorage
+TraceCollector --> TraceStorage
+MetricsCollector --> MetricsStorage
+
+MetricsStorage --> Alerting
+LogStorage --> LogCleanup
+
+%% STYLES
+classDef user fill:#f9f,stroke:#333,stroke-width:2px,color:#000;
+classDef frontend fill:#4da6ff,color:#fff,stroke:#1f4d7a;
+classDef service fill:#00b894,color:#fff,stroke:#006644;
+classDef database fill:#f39c12,color:#fff,stroke:#8e5a00;
+classDef queue fill:#9b59b6,color:#fff,stroke:#4a235a;
+classDef observability fill:#34495e,color:#fff,stroke:#1b2631;
+
+class Publisher,Reader user;
+class Webapp,Website frontend;
+class DraftService,PublisherService,CommentService,ArticleService,SubscriberService,NewsletterService,ProfanityService service;
+class DraftDB,ArticleDB,CommentDB,SubscriberDB,ProfanityDB database;
+class ArticleQueue,SubscriberQueue queue;
+class LogCollector,TraceCollector,MetricsCollector,LogStorage,TraceStorage,MetricsStorage,Alerting,LogCleanup observability;
