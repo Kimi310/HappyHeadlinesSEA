@@ -1,5 +1,4 @@
 using CommentService.DataAccess.Interfaces;
-using DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 

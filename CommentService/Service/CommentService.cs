@@ -1,30 +1,63 @@
-using comment_service.Service.Interfaces;
-using DataAccess.Models;
-using comment_service.Service;
+using CommentService.DataAccess.Interfaces;
+using CommentService.Service.Interfaces;
+using CommentService.DataAccess.Models;
+using ProfanityService.Controllers.Models;
 
-namespace comment_service.Service;
+namespace CommentService.Service;
 
-public class CommentService: ICommentService
+public class CommentService : ICommentService
 {
-
-    public Task<IEnumerable<Comment>> GetCommentsByArticleIdAsync(Guid articleId)
+    private readonly ICommentRepository _commentRepository;
+    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly string _profanityApiUrl;
+    
+    public CommentService(ICommentRepository commentRepository, IHttpClientFactory httpClientFactory, IConfiguration configuration)
     {
-        throw new NotImplementedException();
+        _commentRepository = commentRepository;
+        _httpClientFactory = httpClientFactory;
+        _profanityApiUrl = configuration["ProfanityService:Url"] 
+            ?? throw new InvalidOperationException("ProfanityService:Url configuration is missing");
     }
-
-    public Task<Comment> CreateCommentAsync(Guid articleId, string commentTex)
+    
+    public async Task<Comment> CreateCommentAsync(Guid articleId, string commentText)
     {
-        throw new NotImplementedException();
+        if (string.IsNullOrWhiteSpace(commentText))
+        {
+            throw new ArgumentException("Comment text cannot be empty", nameof(commentText));
+        }
+
+        var httpClient = _httpClientFactory.CreateClient();
+    
+        var requestBody = new
+        {
+            text = commentText,
+            replacementChar = '*'
+        };
+
+        var response = await httpClient.PostAsJsonAsync($"{_profanityApiUrl}/api/profanity/filter", requestBody);
+        response.EnsureSuccessStatusCode();
+    
+        var result = await response.Content.ReadFromJsonAsync<FilterResponse>();
+    
+        var wasFiltered = result.FilteredText != commentText;
+
+        var comment = new Comment
+        {
+            Id = Guid.NewGuid(),
+            ArticleId = articleId,
+            Content = result.FilteredText,
+            WasFiltered = wasFiltered,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        await _commentRepository.CreateAsync(comment);
+
+        return comment;
     }
-
-    public Task<Comment?> GetCommentByIdAsync(Guid commentId)
+    
+    public async Task<IEnumerable<Comment>> GetCommentsByArticleIdAsync(Guid articleId)
     {
-        throw new NotImplementedException();
-    }
-
-    public Task<Comment> UpdateCommentAsync(Guid commentId, string commentText)
-    {
-        throw new NotImplementedException();
+        return await _commentRepository.GetByArticleIdAsync(articleId);
     }
 
     public Task<bool> DeleteCommentAsync(Guid commentId)

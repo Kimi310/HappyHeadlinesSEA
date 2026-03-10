@@ -16,7 +16,7 @@ public class CommentRepository : ICommentRepository
     public async Task<Comment> CreateAsync(Comment comment)
     {
         var context = _factory.Create(true);
-        var response = context.Comments.Add(comment);
+        context.Comments.Add(comment);
         await context.SaveChangesAsync();
         return comment;
     }

@@ -9,6 +9,9 @@
     <ItemGroup>
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.24" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.24" />
+      <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="8.1.4" />
+      <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="8.1.4" />
+      <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="8.1.4" />
     </ItemGroup>
 
     <ItemGroup>
@@ -16,6 +19,10 @@
         <Link>.dockerignore</Link>
         <DependentUpon>Dockerfile</DependentUpon>
       </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\ProfanityService\ProfanityService.csproj" />
     </ItemGroup>
 
 </Project>
