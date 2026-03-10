@@ -10,9 +10,9 @@ services:
     ports:
       - "1433:1433"
     volumes:
-      - sqlvolume:/var/opt/mssql
+      - sqlvolume-article:/var/opt/mssql
     restart: always
-    
+  
   sqlserver-comment:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: comment-sqlserver
@@ -20,9 +20,9 @@ services:
       SA_PASSWORD: "YourStrong!Passw0rd"
       ACCEPT_EULA: "Y"
     ports:
-      - "1434:1434"
+      - "1434:1433"
     volumes:
-      - sqlvolume:/var/opt/mssql/comment
+      - sqlvolume-comment:/var/opt/mssql
     restart: always
   
   sqlserver-profanity:
@@ -32,9 +32,9 @@ services:
       SA_PASSWORD: "YourStrong!Passw0rd"
       ACCEPT_EULA: "Y"
     ports:
-      - "1435:1435"
+      - "1435:1433"
     volumes:
-      - sqlvolume:/var/opt/mssql/profanity
+      - sqlvolume-profanity:/var/opt/mssql
     restart: always
 
   db-init:
@@ -54,11 +54,11 @@ services:
     depends_on:
       - sqlserver-comment
     volumes:
-      - ./init.sql:/comment-init.sql
+      - ./comment-init.sql:/init.sql
     entrypoint: >
       /bin/bash -c "
       sleep 25 &&
-      /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P YourStrong!Passw0rd -i /comment-init.sql
+      /opt/mssql-tools/bin/sqlcmd -S sqlserver-comment -U sa -P YourStrong!Passw0rd -i /init.sql
       "
 
   db-profanity-init:
@@ -66,11 +66,11 @@ services:
     depends_on:
       - sqlserver-profanity
     volumes:
-      - ./init.sql:/profanity-init.sql
+      - ./profanity-init.sql:/init.sql
     entrypoint: >
       /bin/bash -c "
       sleep 25 &&
-      /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P YourStrong!Passw0rd -i /profanity-init.sql
+      /opt/mssql-tools/bin/sqlcmd -S sqlserver-profanity -U sa -P YourStrong!Passw0rd -i /init.sql
       "
 
   api-1:
@@ -78,9 +78,9 @@ services:
     image: happyheaders-api:latest
     ports:
       - "5199:5199"
-    environment:                    
+    environment:
       - ASPNETCORE_ENVIRONMENT=Development
-    depends_on:                     
+    depends_on:
       - sqlserver
   
   api-2:
@@ -89,8 +89,10 @@ services:
       - "5200:5199"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-    depends_on:                     
+    depends_on:
       - sqlserver
 
 volumes:
-  sqlvolume:
+  sqlvolume-article:
+  sqlvolume-comment:
+  sqlvolume-profanity:
