@@ -1,12 +1,12 @@
-using DataAccess.Models;
+using CommentService.DataAccess.Models;
 
-namespace DataAccess;
+namespace CommentService.DataAccess;
 
 using Microsoft.EntityFrameworkCore;
 
 public class CommentDbContext : DbContext
 {
-    public CommentDbContext(DbContextOptions<ArticleDbContext> options)
+    public CommentDbContext(DbContextOptions<CommentDbContext> options)
         : base(options)
     {
     }

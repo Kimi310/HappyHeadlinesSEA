@@ -1,10 +1,9 @@
-using DataAccess.Interfaces;
-
-
-
+using CommentService.DataAccess.Interfaces;
+using DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-namespace DataAccess;
+
+namespace CommentService.DataAccess;
 public class CommentDbContextFactory : ICommentDbContextFactory
 {
     private readonly DatabaseOptions _dbOptions;
@@ -16,7 +15,7 @@ public class CommentDbContextFactory : ICommentDbContextFactory
 
     public CommentDbContext Create(bool isGlobal)
     {
-        var optionsBuilder = new DbContextOptionsBuilder<ArticleDbContext>();
+        var optionsBuilder = new DbContextOptionsBuilder<CommentDbContext>();
 
         string connectionString = isGlobal
             ? _dbOptions.CommentGlobal

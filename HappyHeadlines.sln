@@ -13,6 +13,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		compose.yaml = compose.yaml
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommentService", "CommentService\CommentService.csproj", "{719206DD-63D5-49AB-92E2-B29E6CAEB189}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProfanityService", "ProfanityService\ProfanityService.csproj", "{34129406-7D3F-4A90-9802-A991D0B8C9C8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,5 +35,13 @@ Global
 		{BB80F80F-0196-458C-87DE-41FB62C96BCA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BB80F80F-0196-458C-87DE-41FB62C96BCA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BB80F80F-0196-458C-87DE-41FB62C96BCA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{719206DD-63D5-49AB-92E2-B29E6CAEB189}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{719206DD-63D5-49AB-92E2-B29E6CAEB189}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{719206DD-63D5-49AB-92E2-B29E6CAEB189}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{719206DD-63D5-49AB-92E2-B29E6CAEB189}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34129406-7D3F-4A90-9802-A991D0B8C9C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34129406-7D3F-4A90-9802-A991D0B8C9C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34129406-7D3F-4A90-9802-A991D0B8C9C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34129406-7D3F-4A90-9802-A991D0B8C9C8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

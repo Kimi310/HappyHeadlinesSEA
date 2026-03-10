@@ -1,4 +1,4 @@
-namespace DataAccess.Models;
+namespace CommentService.DataAccess.Models;
 
 public class Comment
 {

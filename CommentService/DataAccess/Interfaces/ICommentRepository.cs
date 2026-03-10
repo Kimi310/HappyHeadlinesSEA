@@ -1,6 +1,7 @@
-using DataAccess.Models;
+using CommentService.DataAccess.Models;
+using CommentService.DataAccess.Models;
 
-namespace DataAccess.Interfaces;
+namespace CommentService.DataAccess.Interfaces;
 
 public interface ICommentRepository
 {

@@ -1,6 +1,6 @@
-using DataAccess.Models;
+using ProfanityService.DataAccess.Models;
 
-namespace DataAccess.Interfaces;
+namespace ProfanityService.DataAccess.Interfaces;
 
 public interface IProfanityRepository
 {

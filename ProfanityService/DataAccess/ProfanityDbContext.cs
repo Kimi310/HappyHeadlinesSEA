@@ -1,12 +1,12 @@
-using DataAccess.Models;
+using ProfanityService.DataAccess.Models;
 
-namespace DataAccess;
+namespace ProfanityService.DataAccess;
 
 using Microsoft.EntityFrameworkCore;
 
 public class ProfanityDbContext : DbContext
 {
-    public ProfanityDbContext(DbContextOptions<ArticleDbContext> options)
+    public ProfanityDbContext(DbContextOptions<ProfanityDbContext> options)
         : base(options)
     {
     }

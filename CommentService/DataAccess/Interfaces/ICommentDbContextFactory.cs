@@ -1,4 +1,6 @@
-namespace DataAccess.Interfaces;
+using CommentService.DataAccess;
+
+namespace CommentService.DataAccess.Interfaces;
 
 public interface ICommentDbContextFactory
 {

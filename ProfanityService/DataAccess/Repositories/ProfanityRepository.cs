@@ -1,8 +1,8 @@
-using DataAccess.Interfaces;
-using DataAccess.Models;
+using ProfanityService.DataAccess.Interfaces;
+using ProfanityService.DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace DataAccess.Repositories;
+namespace ProfanityService.DataAccess.Repositories;
 
 public class ProfanityRepository : IProfanityRepository
 {

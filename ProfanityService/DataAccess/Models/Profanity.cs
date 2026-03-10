@@ -1,4 +1,4 @@
-namespace DataAccess.Models;
+namespace ProfanityService.DataAccess.Models;
 
 public class Profanity
 {

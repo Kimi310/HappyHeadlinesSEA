@@ -1,8 +1,8 @@
-using DataAccess.Interfaces;
-using DataAccess.Models;
+using CommentService.DataAccess.Interfaces;
+using CommentService.DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace DataAccess.Repositories;
+namespace CommentService.DataAccess.Repositories;
 
 public class CommentRepository : ICommentRepository
 {

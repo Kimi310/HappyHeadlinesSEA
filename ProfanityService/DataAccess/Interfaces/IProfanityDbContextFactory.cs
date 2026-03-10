@@ -1,4 +1,4 @@
-namespace DataAccess.Interfaces;
+namespace ProfanityService.DataAccess.Interfaces;
 
 public interface IProfanityDbContextFactory
 {

@@ -1,8 +1,8 @@
-using DataAccess.Interfaces;
+using ProfanityService.DataAccess.Interfaces;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-namespace DataAccess;
+namespace ProfanityService.DataAccess;
 public class ProfanityDbContextFactory : IProfanityDbContextFactory
 {
     private readonly DatabaseOptions _dbOptions;
@@ -14,7 +14,7 @@ public class ProfanityDbContextFactory : IProfanityDbContextFactory
 
     public ProfanityDbContext Create(bool isGlobal)
     {
-        var optionsBuilder = new DbContextOptionsBuilder<ArticleDbContext>();
+        var optionsBuilder = new DbContextOptionsBuilder<ProfanityDbContext>();
 
         string connectionString = isGlobal 
             ? _dbOptions.ProfanityGlobal 

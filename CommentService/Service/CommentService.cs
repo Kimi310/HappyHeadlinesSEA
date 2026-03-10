@@ -1,7 +1,8 @@
+using comment_service.Service.Interfaces;
 using DataAccess.Models;
-using Services.Interfaces;
+using comment_service.Service;
 
-namespace Services.Services;
+namespace comment_service.Service;
 
 public class CommentService: ICommentService
 {
