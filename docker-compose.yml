@@ -1,7 +1,7 @@
 ﻿version: '3.8'
 
 services:
-  sqlserver:
+  sqlserver-article:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: article-sqlserver
     environment:
@@ -10,39 +10,79 @@ services:
     ports:
       - "1433:1433"
     volumes:
-      - sqlvolume:/var/opt/mssql
+      - sqlvolume_article:/var/opt/mssql
     restart: always
 
-  db-init:
+  sqlserver-draft:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: draft-sqlserver
+    environment:
+      SA_PASSWORD: "YourStrong!Passw0rd"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1434:1433"
+    volumes:
+      - sqlvolume_draft:/var/opt/mssql
+    restart: always
+
+  db-init-article:
     image: mcr.microsoft.com/mssql-tools
     depends_on:
-      - sqlserver
+      - sqlserver-article
     volumes:
-      - ./init.sql:/init.sql
+      - ./ArticleInit.sql:/ArticleInit.sql
     entrypoint: >
       /bin/bash -c "
       sleep 25 &&
-      /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P YourStrong!Passw0rd -i /init.sql
+      /opt/mssql-tools/bin/sqlcmd -S sqlserver-article -U sa -P YourStrong!Passw0rd -i /ArticleInit.sql
       "
 
-  api-1:
-    build: .
+  db-init-draft:
+    image: mcr.microsoft.com/mssql-tools
+    depends_on:
+      - sqlserver-draft
+    volumes:
+      - ./DraftInit.sql:/DraftInit.sql
+    entrypoint: >
+      /bin/bash -c "
+      sleep 25 &&
+      /opt/mssql-tools/bin/sqlcmd -S sqlserver-draft -U sa -P YourStrong!Passw0rd -i /DraftInit.sql
+      "
+  
+  api-1-article:
+    build:
+      context: .
+      dockerfile: ArticleService/Dockerfile
     image: happyheaders-api:latest
     ports:
       - "5199:5199"
-    environment:                    
+    environment:
       - ASPNETCORE_ENVIRONMENT=Development
-    depends_on:                     
-      - sqlserver
+    depends_on:
+      - sqlserver-article
   
-  api-2:
+  api-2-article:
     image: happyheaders-api:latest
     ports:
       - "5200:5199"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-    depends_on:                     
-      - sqlserver
+    depends_on:
+      - sqlserver-article
+  
+  api-draft:
+    build:
+      context: .
+      dockerfile: DraftService/Dockerfile
+    image: happyheaders-draft-api:latest
+    ports:
+      - "5201:5201"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - sqlserver-draft
+    
 
 volumes:
-  sqlvolume:
+  sqlvolume_article:
+  sqlvolume_draft:

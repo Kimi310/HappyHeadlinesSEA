@@ -7,6 +7,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArticleService", "ArticleService\ArticleService.csproj", "{5008605F-FE7A-4CEA-8295-5EBA54832C42}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DraftService", "DraftService\DraftService.csproj", "{225DAA52-DA28-4C9D-9E7A-07E12D6E7C4D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,6 +19,10 @@ Global
 		{5008605F-FE7A-4CEA-8295-5EBA54832C42}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5008605F-FE7A-4CEA-8295-5EBA54832C42}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5008605F-FE7A-4CEA-8295-5EBA54832C42}.Release|Any CPU.Build.0 = Release|Any CPU
+		{225DAA52-DA28-4C9D-9E7A-07E12D6E7C4D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{225DAA52-DA28-4C9D-9E7A-07E12D6E7C4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{225DAA52-DA28-4C9D-9E7A-07E12D6E7C4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{225DAA52-DA28-4C9D-9E7A-07E12D6E7C4D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection
