@@ -1,8 +1,8 @@
-﻿using DataAccess.Models;
+﻿using ArticleService.Service.Interfaces;
+using DataAccess.Models;
 using Microsoft.AspNetCore.Mvc;
-using Services.Interfaces;
 
-namespace HappyHeadlines.Controllers;
+namespace ArticleService.Controllers;
 
 [ApiController]
 [Route("api/article")]

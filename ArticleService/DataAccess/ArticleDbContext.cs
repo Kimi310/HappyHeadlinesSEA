@@ -1,6 +1,6 @@
 ﻿using DataAccess.Models;
 
-namespace DataAccess;
+namespace ArticleService.DataAccess;
 
 using Microsoft.EntityFrameworkCore;
 

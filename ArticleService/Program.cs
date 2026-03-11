@@ -1,8 +1,9 @@
+using ArticleService.DataAccess;
+using ArticleService.DataAccess.Interfaces;
+using ArticleService.DataAccess.Repositories;
+using ArticleService.Service.Interfaces;
 using DataAccess;
-using DataAccess.Interfaces;
-using DataAccess.Repositories;
-using Services.Interfaces;
-using Services.Services;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +13,7 @@ builder.Services.Configure<DatabaseOptions>(
 
 builder.Services.AddScoped<IArticleDbContextFactory, ArticleDbContextFactory>();
 builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
-builder.Services.AddScoped<IArticleService, ArticleService>();
+builder.Services.AddScoped<IArticleService, ArticleService.Service.Services.ArticleService>();
 builder.Services.AddControllers();
 var app = builder.Build();
 

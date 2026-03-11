@@ -1,6 +1,6 @@
 ﻿using DataAccess.Models;
 
-namespace DataAccess.Interfaces;
+namespace ArticleService.DataAccess.Interfaces;
 
 public interface IArticleRepository
 {
