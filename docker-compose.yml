@@ -73,24 +73,78 @@ services:
       /opt/mssql-tools/bin/sqlcmd -S sqlserver-profanity -U sa -P YourStrong!Passw0rd -i /init.sql
       "
 
-  api-1:
-    build: .
-    image: happyheaders-api:latest
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-load-balancer
     ports:
-      - "5199:5199"
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - article-service
+      - article-service-2
+    restart: always
+
+  article-service:
+    build:
+      context: .
+      dockerfile: ArticleService/Dockerfile
+    container_name: article-service
+    image: article-service:latest
+    ports:
+      - "8081:80"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     depends_on:
       - sqlserver
-  
-  api-2:
-    image: happyheaders-api:latest
+      - db-init
+    restart: always
+
+  article-service-2:
+    build:
+      context: .
+      dockerfile: ArticleService/Dockerfile
+    container_name: article-service-2
+    image: article-service:latest
     ports:
-      - "5200:5199"
+      - "8082:80"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     depends_on:
       - sqlserver
+      - db-init
+    restart: always
+
+  comment-service:
+    build:
+      context: .
+      dockerfile: CommentService/Dockerfile
+    container_name: comment-service
+    image: comment-service:latest
+    ports:
+      - "8083:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - sqlserver-comment
+      - db-comment-init
+      - profanity-service
+    restart: always
+
+  profanity-service:
+    build:
+      context: .
+      dockerfile: ProfanityService/Dockerfile
+    container_name: profanity-service
+    image: profanity-service:latest
+    ports:
+      - "8084:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - sqlserver-profanity
+      - db-profanity-init
+    restart: always
 
 volumes:
   sqlvolume-article:

@@ -1,7 +1,6 @@
 using CommentService.DataAccess.Interfaces;
 using CommentService.Service.Interfaces;
 using CommentService.DataAccess.Models;
-using ProfanityService.Controllers.Models;
 
 namespace CommentService.Service;
 
