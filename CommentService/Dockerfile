@@ -5,21 +5,16 @@ WORKDIR /
 
 # Copy project files for both services
 COPY CommentService/CommentService.csproj CommentService/
-
 WORKDIR /CommentService
 RUN dotnet restore
 
-# Copy all source files
-WORKDIR /
-COPY CommentService/ CommentService/
-
-WORKDIR /CommentService
-RUN dotnet build -c Debug -o /app/build
+COPY CommentService/ .
+RUN dotnet build -c Release -o /app/build
 
 # Publish stage
 FROM build AS publish
 WORKDIR /CommentService
-RUN dotnet publish CommentService.csproj -c Debug -o /app/publish /p:UseAppHost=false
+RUN dotnet publish CommentService.csproj -c Release -o /app/publish /p:UseAppHost=false
 
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final

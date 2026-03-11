@@ -10,12 +10,12 @@ RUN dotnet restore
 
 # Copy source code
 COPY ArticleService/ .
-RUN dotnet build -c Debug -o /app/build
+RUN dotnet build -c Release -o /app/build
 
 # Publish stage
 FROM build AS publish
 WORKDIR /ArticleService
-RUN dotnet publish ArticleService.csproj -c Debug -o /app/publish /p:UseAppHost=false
+RUN dotnet publish ArticleService.csproj -c Release -o /app/publish /p:UseAppHost=false
 
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
