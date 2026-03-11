@@ -128,7 +128,6 @@ services:
     depends_on:
       - sqlserver-comment
       - db-comment-init
-      - profanity-service
     restart: always
 
   profanity-service:

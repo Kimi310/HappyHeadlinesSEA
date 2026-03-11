@@ -1,27 +1,25 @@
-﻿# Build stage
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+﻿FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
 
-WORKDIR /
+COPY ["ProfanityService/ProfanityService.csproj", "ProfanityService/"]
+RUN dotnet restore "ProfanityService/ProfanityService.csproj"
 
-# Copy project files
-COPY ProfanityService/ProfanityService.csproj ProfanityService/
-WORKDIR /ProfanityService
-RUN dotnet restore
+COPY . .
 
-# Copy source code
-COPY ProfanityService/ .
-RUN dotnet build -c Release -o /app/build
+WORKDIR /src/ProfanityService
+RUN dotnet build "ProfanityService.csproj" -c Release -o /app/build
 
-# Publish stage
 FROM build AS publish
-WORKDIR /ProfanityService
-RUN dotnet publish ProfanityService.csproj -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "ProfanityService.csproj" -c Release -o /app/publish
 
-# Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
+
 COPY --from=publish /app/publish .
+
 EXPOSE 80
+
 ENV ASPNETCORE_ENVIRONMENT=Development
 ENV ASPNETCORE_URLS=http://+:80
+
 ENTRYPOINT ["dotnet", "ProfanityService.dll"]
