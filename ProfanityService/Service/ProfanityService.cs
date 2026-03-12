@@ -20,7 +20,7 @@ public class ProfanityService(IProfanityRepository profanityRepository): IProfan
     
         foreach (var profanity in profanities)
         {
-            var profanityText = profanity.ToString();
+            var profanityText = profanity.Word;
         
             if (string.IsNullOrWhiteSpace(profanityText))
             {

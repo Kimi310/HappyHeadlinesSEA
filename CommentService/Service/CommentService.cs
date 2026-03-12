@@ -44,8 +44,7 @@ public class CommentService : ICommentService
         {
             Id = Guid.NewGuid(),
             ArticleId = articleId,
-            Content = result.FilteredText,
-            WasFiltered = wasFiltered,
+            Content = wasFiltered ? result.FilteredText : commentText,
             CreatedAt = DateTime.UtcNow
         };
 
