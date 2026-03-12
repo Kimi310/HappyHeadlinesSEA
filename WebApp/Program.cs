@@ -21,7 +21,7 @@ Log.Logger = new LoggerConfiguration()
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHttpClient("draftservice", client =>
 {
-    client.BaseAddress = new Uri("http://api-draft:5201");
+    client.BaseAddress = new Uri("http://draft-service:5201");
 });
 builder.Services.AddSwaggerGen();
 
