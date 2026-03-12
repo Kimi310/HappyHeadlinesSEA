@@ -1,0 +1,36 @@
+﻿flowchart LR
+
+%% USERS
+Publisher["Publisher<br/>Writes and publishes articles"]
+Reader["Reader<br/>Reads, comments, subscribes"]
+
+%% MAIN SYSTEM
+HappyHeadlines["HappyHeadlines System<br/>Positive news publishing platform"]
+
+%% EXTERNAL SYSTEMS (BUY NOT BUILD)
+
+Monitoring["Observability Platform<br/>(Metrics + Logs + Tracing)"]
+
+Alerting["Alerting System<br/>Sends alerts on failures"]
+
+LogRetention["Log Retention & Cleanup<br/>Automated lifecycle policies"]
+
+%% USER INTERACTION
+Publisher -->|Creates and publishes articles| HappyHeadlines
+Reader -->|Reads, comments, subscribes| HappyHeadlines
+
+%% MONITORING FLOWS
+HappyHeadlines -->|Metrics, logs, traces| Monitoring
+Monitoring -->|Alerts| Alerting
+Monitoring -->|Log lifecycle policies| LogRetention
+
+%% STYLING
+classDef user fill:#f9f,stroke:#333,stroke-width:2px,color:#000;
+classDef system fill:#4da6ff,color:#fff,stroke:#1f4d7a;
+classDef monitoring fill:#00b894,color:#fff,stroke:#006644;
+classDef ops fill:#f39c12,color:#fff,stroke:#8e5a00;
+
+class Publisher,Reader user;
+class HappyHeadlines system;
+class Monitoring monitoring;
+class Alerting,LogRetention ops;

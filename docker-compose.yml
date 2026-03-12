@@ -1,11 +1,13 @@
-﻿version: '3.8'
+version: '3.8'
 
 networks:
   app-network:
     driver: bridge
 
 services:
-  sqlserver:
+  # ---------------- DATABASES ----------------
+
+  sqlserver-article:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: article-sqlserver
     environment:
@@ -14,11 +16,11 @@ services:
     ports:
       - "1433:1433"
     volumes:
-      - sqlvolume-article:/var/opt/mssql
+      - sqlvolume_article:/var/opt/mssql
     restart: always
     networks:
       - app-network
-  
+
   sqlserver-comment:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: comment-sqlserver
@@ -28,11 +30,11 @@ services:
     ports:
       - "1434:1433"
     volumes:
-      - sqlvolume-comment:/var/opt/mssql
+      - sqlvolume_comment:/var/opt/mssql
     restart: always
     networks:
       - app-network
-  
+
   sqlserver-profanity:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: profanity-sqlserver
@@ -42,26 +44,42 @@ services:
     ports:
       - "1435:1433"
     volumes:
-      - sqlvolume-profanity:/var/opt/mssql
+      - sqlvolume_profanity:/var/opt/mssql
     restart: always
     networks:
       - app-network
 
-  db-init:
+  sqlserver-draft:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: draft-sqlserver
+    environment:
+      SA_PASSWORD: "YourStrong!Passw0rd"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1436:1433"
+    volumes:
+      - sqlvolume_draft:/var/opt/mssql
+    restart: always
+    networks:
+      - app-network
+
+  # ---------------- DB INIT ----------------
+
+  db-init-article:
     image: mcr.microsoft.com/mssql-tools
     depends_on:
-      - sqlserver
+      - sqlserver-article
     volumes:
-      - ./init.sql:/init.sql
+      - ./ArticleInit.sql:/init.sql
     entrypoint: >
       /bin/bash -c "
       sleep 25 &&
-      /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P YourStrong!Passw0rd -i /init.sql
+      /opt/mssql-tools/bin/sqlcmd -S sqlserver-article -U sa -P YourStrong!Passw0rd -i /init.sql
       "
     networks:
       - app-network
 
-  db-comment-init:
+  db-init-comment:
     image: mcr.microsoft.com/mssql-tools
     depends_on:
       - sqlserver-comment
@@ -75,7 +93,7 @@ services:
     networks:
       - app-network
 
-  db-profanity-init:
+  db-init-profanity:
     image: mcr.microsoft.com/mssql-tools
     depends_on:
       - sqlserver-profanity
@@ -89,6 +107,103 @@ services:
     networks:
       - app-network
 
+  db-init-draft:
+    image: mcr.microsoft.com/mssql-tools
+    depends_on:
+      - sqlserver-draft
+    volumes:
+      - ./DraftInit.sql:/init.sql
+    entrypoint: >
+      /bin/bash -c "
+      sleep 25 &&
+      /opt/mssql-tools/bin/sqlcmd -S sqlserver-draft -U sa -P YourStrong!Passw0rd -i /init.sql
+      "
+    networks:
+      - app-network
+
+  # ---------------- SERVICES ----------------
+
+  article-service:
+    build:
+      context: .
+      dockerfile: ArticleService/Dockerfile
+    image: article-service:latest
+    ports:
+      - "8081:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - sqlserver-article
+      - db-init-article
+    networks:
+      - app-network
+
+  article-service-2:
+    image: article-service:latest
+    ports:
+      - "8082:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - sqlserver-article
+    networks:
+      - app-network
+
+  comment-service:
+    build:
+      context: .
+      dockerfile: CommentService/Dockerfile
+    image: comment-service:latest
+    ports:
+      - "8083:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ProfanityService__Url=http://profanity-service:80
+    depends_on:
+      - sqlserver-comment
+      - profanity-service
+    networks:
+      - app-network
+
+  profanity-service:
+    build:
+      context: .
+      dockerfile: ProfanityService/Dockerfile
+    image: profanity-service:latest
+    ports:
+      - "8084:80"
+    depends_on:
+      - sqlserver-profanity
+    networks:
+      - app-network
+
+  draft-service:
+    build:
+      context: .
+      dockerfile: DraftService/Dockerfile
+    image: draft-service:latest
+    ports:
+      - "5201:5201"
+    depends_on:
+      - sqlserver-draft
+    networks:
+      - app-network
+
+  webapp:
+    build:
+      context: .
+      dockerfile: WebApp/Dockerfile
+    image: webapp:latest
+    ports:
+      - "5202:5202"
+    depends_on:
+      - article-service
+      - draft-service
+    networks:
+      - app-network
+
+  # ---------------- LOAD BALANCER ----------------
+
   nginx:
     image: nginx:alpine
     container_name: nginx-load-balancer
@@ -99,81 +214,39 @@ services:
     depends_on:
       - article-service
       - article-service-2
-    restart: always
     networks:
       - app-network
 
-  article-service:
-    build:
-      context: .
-      dockerfile: ArticleService/Dockerfile
-    container_name: article-service
-    image: article-service:latest
+  # ---------------- OBSERVABILITY ----------------
+
+  loki:
+    image: grafana/loki:2.9.0
     ports:
-      - "8081:80"
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-    depends_on:
-      - sqlserver
-      - db-init
-    restart: always
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
     networks:
       - app-network
 
-  article-service-2:
-    build:
-      context: .
-      dockerfile: ArticleService/Dockerfile
-    container_name: article-service-2
-    image: article-service:latest
+  grafana:
+    image: grafana/grafana
     ports:
-      - "8082:80"
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-    depends_on:
-      - sqlserver
-      - db-init
-    restart: always
+      - "3000:3000"
     networks:
       - app-network
 
-  comment-service:
-    build:
-      context: .
-      dockerfile: CommentService/Dockerfile
-    container_name: comment-service
-    image: comment-service:latest
+  tempo:
+    image: grafana/tempo:2.4.1
+    command: ["-config.file=/etc/tempo.yaml"]
+    volumes:
+      - ./tempo.yaml:/etc/tempo.yaml
     ports:
-      - "8083:80"
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ProfanityService__Url=http://profanity-service:80
-    depends_on:
-      - sqlserver-comment
-      - db-comment-init
-      - profanity-service
-    restart: always
-    networks:
-      - app-network
-
-  profanity-service:
-    build:
-      context: .
-      dockerfile: ProfanityService/Dockerfile
-    container_name: profanity-service
-    image: profanity-service:latest
-    ports:
-      - "8084:80"
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-    depends_on:
-      - sqlserver-profanity
-      - db-profanity-init
-    restart: always
+      - "3200:3200"
+      - "4317:4317"
     networks:
       - app-network
 
 volumes:
-  sqlvolume-article:
-  sqlvolume-comment:
-  sqlvolume-profanity:
+  sqlvolume_article:
+  sqlvolume_comment:
+  sqlvolume_profanity:
+  sqlvolume_draft:
