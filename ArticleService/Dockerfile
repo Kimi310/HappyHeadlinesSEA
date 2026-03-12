@@ -17,9 +17,9 @@ WORKDIR /app
 
 COPY --from=publish /app/publish .
 
-EXPOSE 5199
+EXPOSE 80
 
 ENV ASPNETCORE_ENVIRONMENT=Development
-ENV ASPNETCORE_URLS=http://+:5199
+ENV ASPNETCORE_URLS=http://+:80
 
 ENTRYPOINT ["dotnet", "ArticleService.dll"]
