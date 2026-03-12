@@ -82,6 +82,20 @@ services:
     depends_on:
       - sqlserver-draft
     
+  api-webapp:
+    build:
+      context: .
+      dockerfile: WebApp/Dockerfile
+    image: happyheaders-webapp-api:latest
+    ports:
+      - "5202:5202"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - api-1-article
+      - api-2-article
+      - api-draft
+  
   loki:
     image: grafana/loki:2.9.0
     ports:
