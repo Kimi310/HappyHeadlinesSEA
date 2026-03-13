@@ -188,7 +188,17 @@ services:
       - sqlserver-draft
     networks:
       - app-network
-
+  
+  publisher-service:
+    build:
+      context: .
+      dockerfile: PublisherService/Dockerfile
+    image: publisher-service:latest
+    ports:
+      - "5203:80"
+    networks:
+      - app-network
+  
   webapp:
     build:
       context: .
