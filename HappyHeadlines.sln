@@ -17,6 +17,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DraftService", "DraftServic
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApp", "WebApp\WebApp.csproj", "{AF8E6B98-BAB5-45CD-89FF-82D45C96114C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PublisherService", "PublisherService\PublisherService.csproj", "{09503A5F-315F-4669-B530-353FDD5D687A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArticleQueue", "ArticleQueue\ArticleQueue.csproj", "{DC708DEB-EF88-4A88-90A2-964C8FCA4A37}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +47,14 @@ Global
 		{AF8E6B98-BAB5-45CD-89FF-82D45C96114C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AF8E6B98-BAB5-45CD-89FF-82D45C96114C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AF8E6B98-BAB5-45CD-89FF-82D45C96114C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09503A5F-315F-4669-B530-353FDD5D687A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09503A5F-315F-4669-B530-353FDD5D687A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09503A5F-315F-4669-B530-353FDD5D687A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09503A5F-315F-4669-B530-353FDD5D687A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC708DEB-EF88-4A88-90A2-964C8FCA4A37}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC708DEB-EF88-4A88-90A2-964C8FCA4A37}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC708DEB-EF88-4A88-90A2-964C8FCA4A37}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC708DEB-EF88-4A88-90A2-964C8FCA4A37}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection

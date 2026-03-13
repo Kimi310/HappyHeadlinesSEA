@@ -1,5 +1,7 @@
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using PublisherService.Messaging;
+using PublisherService.Options;
 using Serilog;
 using Serilog.Sinks.Grafana.Loki;
 
@@ -12,29 +14,21 @@ Log.Logger = new LoggerConfiguration()
         "http://loki:3100",
         labels: new[]
         {
-            new LokiLabel { Key = "app", Value = "webapp" }
+            new LokiLabel { Key = "app", Value = "publisherService" },
         })
     .CreateLogger();
 
 
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddHttpClient("draftservice", client =>
-{
-    client.BaseAddress = new Uri("http://draft-service:5201");
-});
-
-builder.Services.AddHttpClient("publisherservice", client =>
-{
-    client.BaseAddress = new Uri("http://publisher-service");
-});
-
 builder.Services.AddSwaggerGen();
+builder.Services.Configure<RabbitMqOptions>(builder.Configuration.GetSection(RabbitMqOptions.SectionName));
+builder.Services.AddSingleton<IArticleEventPublisher, RabbitMqArticleEventPublisher>();
 
 builder.Services.AddOpenTelemetry()
     .ConfigureResource(resource => resource
         .AddService(
-            serviceName: "webapp",
+            serviceName: "PublisherService",
             serviceVersion: "1.0.0"))
     .WithTracing(tracing =>
     {
@@ -44,6 +38,7 @@ builder.Services.AddOpenTelemetry()
                 options.RecordException = true;
             })
             .AddHttpClientInstrumentation()
+            .AddSource("PublisherService.Messaging")
             .AddOtlpExporter(options =>
             {
                 options.Endpoint = new Uri("http://tempo:4317");
@@ -53,6 +48,7 @@ builder.Services.AddOpenTelemetry()
 builder.Host.UseSerilog();
 builder.Services.AddControllers();
 var app = builder.Build();
+
 
 app.UseSwagger();
 app.UseSwaggerUI();
@@ -65,5 +61,6 @@ app.UseCors(config =>
         .AllowAnyOrigin());
 
 app.MapControllers();
+
 
 app.Run();
