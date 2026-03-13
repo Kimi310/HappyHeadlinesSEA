@@ -121,6 +121,42 @@ services:
     networks:
       - app-network
 
+  # ---------------- QUEUE ----------------
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=article_user
+      - RABBITMQ_DEFAULT_PASS=article_password
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    restart: always
+    networks:
+      - app-network
+
+  article-queue:
+    build:
+      context: .
+      dockerfile: ArticleQueue/Dockerfile
+    image: article-queue:latest
+    ports:
+      - "5204:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__Port=5672
+      - RabbitMq__Username=article_user
+      - RabbitMq__Password=article_password
+      - RabbitMq__Exchange=article.events
+      - RabbitMq__Queue=article.published
+      - RabbitMq__RoutingKey=article.published
+    depends_on:
+      - rabbitmq
+    networks:
+      - app-network
+
   # ---------------- SERVICES ----------------
 
   article-service:
@@ -132,9 +168,18 @@ services:
       - "8081:80"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__Port=5672
+      - RabbitMq__Username=article_user
+      - RabbitMq__Password=article_password
+      - RabbitMq__Exchange=article.events
+      - RabbitMq__Queue=article.published
+      - RabbitMq__RoutingKey=article.published
     depends_on:
       - sqlserver-article
       - db-init-article
+      - rabbitmq
+      - article-queue
     networks:
       - app-network
 
@@ -144,8 +189,17 @@ services:
       - "8082:80"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__Port=5672
+      - RabbitMq__Username=article_user
+      - RabbitMq__Password=article_password
+      - RabbitMq__Exchange=article.events
+      - RabbitMq__Queue=article.published
+      - RabbitMq__RoutingKey=article.published
     depends_on:
       - sqlserver-article
+      - rabbitmq
+      - article-queue
     networks:
       - app-network
 
@@ -196,6 +250,18 @@ services:
     image: publisher-service:latest
     ports:
       - "5203:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__Port=5672
+      - RabbitMq__Username=article_user
+      - RabbitMq__Password=article_password
+      - RabbitMq__Exchange=article.events
+      - RabbitMq__Queue=article.published
+      - RabbitMq__RoutingKey=article.published
+    depends_on:
+      - rabbitmq
+      - article-queue
     networks:
       - app-network
   

@@ -1,5 +1,7 @@
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using PublisherService.Messaging;
+using PublisherService.Options;
 using Serilog;
 using Serilog.Sinks.Grafana.Loki;
 
@@ -20,6 +22,8 @@ Log.Logger = new LoggerConfiguration()
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSwaggerGen();
+builder.Services.Configure<RabbitMqOptions>(builder.Configuration.GetSection(RabbitMqOptions.SectionName));
+builder.Services.AddSingleton<IArticleEventPublisher, RabbitMqArticleEventPublisher>();
 
 builder.Services.AddOpenTelemetry()
     .ConfigureResource(resource => resource
@@ -34,6 +38,7 @@ builder.Services.AddOpenTelemetry()
                 options.RecordException = true;
             })
             .AddHttpClientInstrumentation()
+            .AddSource("PublisherService.Messaging")
             .AddOtlpExporter(options =>
             {
                 options.Endpoint = new Uri("http://tempo:4317");

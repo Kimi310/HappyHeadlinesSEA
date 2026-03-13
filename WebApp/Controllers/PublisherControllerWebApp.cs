@@ -19,8 +19,14 @@ public class PublisherControllerWebApp : ControllerBase
     [Route("addArticle")]
     public async Task<IActionResult> AddArticle([FromBody] Article article)
     {
-        await _httpClient.PostAsJsonAsync("/Publisher/publishArticle",article);
-        return Ok();
+        var response = await _httpClient.PostAsJsonAsync("/publishArticle", article);
+        if (response.IsSuccessStatusCode)
+        {
+            return Ok();
+        }
+
+        var body = await response.Content.ReadAsStringAsync();
+        return StatusCode((int)response.StatusCode, body);
     }
     
 }

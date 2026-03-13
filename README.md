@@ -21,3 +21,10 @@ docker compose up --build
 ```
 docker compose up --build
 ```
+
+## RabbitMQ article flow
+
+- RabbitMQ broker is exposed on `5672` and management UI on `15672`.
+- `ArticleQueue` initializes exchange/queue topology for article events.
+- `PublisherService` publishes `/publishArticle` messages to RabbitMQ.
+- `ArticleService` consumes from queue and stores articles in SQL.
