@@ -264,6 +264,28 @@ services:
       - article-queue
     networks:
       - app-network
+    
+  newsletter-service:
+    build:
+      context: .
+      dockerfile: NewsletterService/Dockerfile
+    image: newsletter-service:latest
+    ports:
+      - "8085:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__Port=5672
+      - RabbitMq__Username=article_user
+      - RabbitMq__Password=article_password
+      - RabbitMq__Exchange=article.events
+      - RabbitMq__Queue=article.newsletter
+      - RabbitMq__RoutingKey=article.published
+    depends_on:
+      - rabbitmq
+      - article-queue
+    networks:
+      - app-network
   
   webapp:
     build:

@@ -1,6 +1,4 @@
 using NewsletterService.DataAccess;
-// using NewsletterService.DataAccess.Interfaces;
-// using NewsletterService.DataAccess.Repositories;
 using NewsletterService.Messaging;
 using NewsletterService.Options;
 using NewsletterService.Service.Interfaces;
@@ -10,14 +8,8 @@ using OpenTelemetry.Trace;
 var builder = WebApplication.CreateBuilder(args);
 
 // Configuration
-// builder.Services.Configure<DatabaseOptions>(
-//     builder.Configuration.GetSection("ConnectionStrings"));
 builder.Services.Configure<RabbitMqOptions>(
     builder.Configuration.GetSection(RabbitMqOptions.SectionName));
-
-// Data Access
-// builder.Services.AddScoped<ISubscriberDbContextFactory, SubscriberDbContextFactory>();
-// builder.Services.AddScoped<ISubscriberRepository, SubscriberRepository>();
 
 // Services
 builder.Services.AddScoped<INewsletterService, NewsletterService.Service.Services.NewsletterService>();
@@ -34,10 +26,6 @@ builder.Services.AddOpenTelemetry()
     .WithTracing(tracing =>
     {
         tracing
-            .AddSqlClientInstrumentation(options =>
-            {
-                options.RecordException = true;
-            })
             .AddSource("NewsletterService.Messaging")
             .AddSource("NewsletterService.Service")
             .AddOtlpExporter(options =>
