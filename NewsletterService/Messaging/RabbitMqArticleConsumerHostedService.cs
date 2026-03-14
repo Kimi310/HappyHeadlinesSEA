@@ -1,0 +1,188 @@
+﻿using System.Text;
+using System.Text.Json;
+using System.Diagnostics;
+using NewsletterService.Messaging;
+using NewsletterService.Options;
+using NewsletterService.Service.Interfaces;
+using NewsletterService.DataAccess.Models;
+using Microsoft.Extensions.Options;
+using OpenTelemetry;
+using OpenTelemetry.Context.Propagation;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
+
+namespace NewsletterService.Messaging;
+
+public sealed class RabbitMqNewsletterConsumerHostedService : BackgroundService
+{
+    private static readonly ActivitySource ActivitySource = new("NewsletterService.Messaging");
+    private static readonly TextMapPropagator Propagator = Propagators.DefaultTextMapPropagator;
+    private static readonly TimeSpan RetryDelay = TimeSpan.FromSeconds(3);
+    private readonly RabbitMqOptions _options;
+    private readonly ILogger<RabbitMqNewsletterConsumerHostedService> _logger;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
+    private IConnection? _connection;
+    private IModel? _channel;
+
+    public RabbitMqNewsletterConsumerHostedService(
+        IOptions<RabbitMqOptions> options,
+        ILogger<RabbitMqNewsletterConsumerHostedService> logger,
+        IServiceScopeFactory serviceScopeFactory)
+    {
+        _options = options.Value;
+        _logger = logger;
+        _serviceScopeFactory = serviceScopeFactory;
+    }
+
+    public override async Task StartAsync(CancellationToken cancellationToken)
+    {
+        var factory = new ConnectionFactory
+        {
+            HostName = _options.Host,
+            Port = _options.Port,
+            UserName = _options.Username,
+            Password = _options.Password,
+            DispatchConsumersAsync = true
+        };
+
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            try
+            {
+                _connection = factory.CreateConnection();
+                _channel = _connection.CreateModel();
+                _channel.ExchangeDeclare(_options.Exchange, ExchangeType.Direct, durable: true, autoDelete: false);
+                _channel.QueueDeclare(_options.Queue, durable: true, exclusive: false, autoDelete: false);
+                _channel.QueueBind(_options.Queue, _options.Exchange, _options.RoutingKey);
+                _channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
+
+                _logger.LogInformation(
+                    "NewsletterService connected to RabbitMQ {Host}:{Port}. Queue={Queue}",
+                    _options.Host,
+                    _options.Port,
+                    _options.Queue);
+
+                await base.StartAsync(cancellationToken);
+                return;
+            }
+            catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
+            {
+                _logger.LogWarning(
+                    ex,
+                    "RabbitMQ is not ready yet for NewsletterService ({Host}:{Port}). Retrying in {DelaySeconds}s",
+                    _options.Host,
+                    _options.Port,
+                    RetryDelay.TotalSeconds);
+                await Task.Delay(RetryDelay, cancellationToken);
+            }
+        }
+
+        throw new OperationCanceledException(cancellationToken);
+    }
+
+    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        if (_channel is null)
+        {
+            throw new InvalidOperationException("RabbitMQ channel was not initialized");
+        }
+
+        var consumer = new AsyncEventingBasicConsumer(_channel);
+        consumer.Received += async (_, eventArgs) =>
+        {
+            var body = eventArgs.Body.ToArray();
+            var message = Encoding.UTF8.GetString(body);
+            var parentContext = Propagator.Extract(default, eventArgs.BasicProperties, ExtractTraceContextFromBasicProperties);
+            Baggage.Current = parentContext.Baggage;
+
+            using var activity = ActivitySource.StartActivity(
+                "newsletter article consume",
+                ActivityKind.Consumer,
+                parentContext.ActivityContext);
+            activity?.SetTag("messaging.system", "rabbitmq");
+            activity?.SetTag("messaging.destination.name", _options.Queue);
+            activity?.SetTag("messaging.rabbitmq.exchange", _options.Exchange);
+            activity?.SetTag("messaging.operation", "process");
+
+            try
+            {
+                var articleEvent = JsonSerializer.Deserialize<ArticlePublishedEvent>(message);
+                if (articleEvent is null)
+                {
+                    _logger.LogWarning("Received empty article message payload");
+                    _channel.BasicNack(eventArgs.DeliveryTag, multiple: false, requeue: false);
+                    return;
+                }
+
+                var article = new Article
+                {
+                    Id = articleEvent.Id,
+                    Title = articleEvent.Title,
+                    Content = articleEvent.Content,
+                    Continent = articleEvent.Continent,
+                    IsGlobal = articleEvent.IsGlobal
+                };
+
+                activity?.SetTag("messaging.message.id", article.Id.ToString());
+                activity?.SetTag("article.continent", article.Continent);
+                activity?.SetTag("article.is_global", article.IsGlobal);
+                activity?.SetTag("article.title", article.Title);
+
+                if (!article.IsGlobal && string.IsNullOrWhiteSpace(article.Continent))
+                {
+                    _logger.LogWarning("Article {ArticleId} rejected because continent is missing", article.Id);
+                    activity?.SetStatus(ActivityStatusCode.Error, "Continent is missing");
+                    _channel.BasicNack(eventArgs.DeliveryTag, multiple: false, requeue: false);
+                    return;
+                }
+
+                using var scope = _serviceScopeFactory.CreateScope();
+                var newsletterService = scope.ServiceProvider.GetRequiredService<INewsletterService>();
+                await newsletterService.ProcessArticleForNewsletter(article);
+
+                _channel.BasicAck(eventArgs.DeliveryTag, multiple: false);
+                _logger.LogInformation(
+                    "Article {ArticleId} processed for newsletter. IsGlobal={IsGlobal}, Continent={Continent}",
+                    article.Id,
+                    article.IsGlobal,
+                    article.Continent ?? "N/A");
+            }
+            catch (Exception ex)
+            {
+                activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+                _logger.LogError(ex, "Failed to process queued article message for newsletter");
+                _channel.BasicNack(eventArgs.DeliveryTag, multiple: false, requeue: false);
+            }
+        };
+
+        _channel.BasicConsume(_options.Queue, autoAck: false, consumer);
+        _logger.LogInformation("NewsletterService is now consuming messages from queue {Queue}", _options.Queue);
+        return Task.CompletedTask;
+    }
+
+    public override Task StopAsync(CancellationToken cancellationToken)
+    {
+        _channel?.Close();
+        _connection?.Close();
+        _channel?.Dispose();
+        _connection?.Dispose();
+
+        _logger.LogInformation("NewsletterService RabbitMQ consumer stopped");
+        return base.StopAsync(cancellationToken);
+    }
+
+    private static IEnumerable<string> ExtractTraceContextFromBasicProperties(IBasicProperties properties, string key)
+    {
+        if (properties.Headers is null || !properties.Headers.TryGetValue(key, out var value) || value is null)
+        {
+            return Array.Empty<string>();
+        }
+
+        return value switch
+        {
+            byte[] bytes => new[] { Encoding.UTF8.GetString(bytes) },
+            string text => new[] { text },
+            _ => Array.Empty<string>()
+        };
+    }
+}
