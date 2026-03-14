@@ -342,9 +342,27 @@ services:
       - "4317:4317"
     networks:
       - app-network
+  
+  # ---------------- CACHE ----------------
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    restart: always
+    networks:
+      - app-network
+  
+  # env for redis
+  # - Redis__Host=redis
+  # - Redis__Port=6379
 
 volumes:
   sqlvolume_article:
   sqlvolume_comment:
   sqlvolume_profanity:
   sqlvolume_draft:
+  redisdata:
