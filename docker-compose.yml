@@ -236,9 +236,11 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ProfanityService__Url=http://profanity-service:80
+      - CommentCache__Url=http://comment-cache:80
     depends_on:
       - sqlserver-comment
       - profanity-service
+      - comment-cache
     networks:
       - app-network
 
@@ -380,6 +382,33 @@ services:
       - "6379:6379"
     volumes:
       - redisdata:/data
+    restart: always
+    networks:
+      - app-network
+  
+  comment-cache:
+    build:
+      context: .
+      dockerfile: CommentCache/Dockerfile
+    image: comment-cache:latest
+    container_name: comment-cache
+    ports:
+      - "8086:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Redis__ConnectionString=redis:6379
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__Port=5672
+      - RabbitMq__Username=article_user
+      - RabbitMq__Password=article_password
+      - RabbitMq__Exchange=article.events
+      - RabbitMq__Queue=commentcache.article.queue
+      - RabbitMq__RoutingKey=article.published
+      - Cache__MaxCachedArticles=30
+      - Cache__TtlMinutes=60
+    depends_on:
+      - redis
+      - rabbitmq
     restart: always
     networks:
       - app-network
