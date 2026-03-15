@@ -7,4 +7,5 @@ public class Article
     public string Content { get; set; }
     public string Continent { get; set; }
     public bool IsGlobal { get; set; }
+    public DateTime PublishedAtUtc { get; set; }
 }
