@@ -119,7 +119,8 @@ public sealed class RabbitMqArticleConsumerHostedService : BackgroundService
                     Title = articleEvent.Title,
                     Content = articleEvent.Content,
                     Continent = articleEvent.Continent,
-                    IsGlobal = articleEvent.IsGlobal
+                    IsGlobal = articleEvent.IsGlobal,
+                    PublishedAtUtc = articleEvent.PublishedAtUtc
                 };
 
                 activity?.SetTag("messaging.message.id", article.Id.ToString());

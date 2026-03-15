@@ -175,11 +175,13 @@ services:
       - RabbitMq__Exchange=article.events
       - RabbitMq__Queue=article.published
       - RabbitMq__RoutingKey=article.published
+      - ArticleCacheApi__BaseUrl=http://article-cache-service:80
     depends_on:
       - sqlserver-article
       - db-init-article
       - rabbitmq
       - article-queue
+      - article-cache-service
     networks:
       - app-network
 
@@ -196,10 +198,31 @@ services:
       - RabbitMq__Exchange=article.events
       - RabbitMq__Queue=article.published
       - RabbitMq__RoutingKey=article.published
+      - ArticleCacheApi__BaseUrl=http://article-cache-service:80
     depends_on:
       - sqlserver-article
       - rabbitmq
       - article-queue
+      - article-cache-service
+    networks:
+      - app-network
+
+  article-cache-service:
+    build:
+      context: .
+      dockerfile: ArticleCacheService/Dockerfile
+    image: article-cache-service:latest
+    ports:
+      - "8086:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Redis__Host=redis
+      - Redis__Port=6379
+      - ArticleCache__PreloadDays=14
+    depends_on:
+      - sqlserver-article
+      - db-init-article
+      - redis
     networks:
       - app-network
 
@@ -329,6 +352,11 @@ services:
     image: grafana/grafana
     ports:
       - "3000:3000"
+    environment:
+      - GF_INSTALL_PLUGINS=yesoreyeram-infinity-datasource
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning
+      - ./observability/grafana/dashboards:/var/lib/grafana/dashboards
     networks:
       - app-network
 

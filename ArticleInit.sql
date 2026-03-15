@@ -15,7 +15,8 @@ CREATE TABLE Articles (
                           Title NVARCHAR(200) NOT NULL,
                           Content NVARCHAR(MAX) NOT NULL,
                           Continent NVARCHAR(50) NOT NULL,
-                          IsGlobal BIT NOT NULL
+                          IsGlobal BIT NOT NULL,
+                          PublishedAtUtc DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
 );
 GO
 
@@ -25,7 +26,8 @@ CREATE TABLE Articles (
                           Title NVARCHAR(200) NOT NULL,
                           Content NVARCHAR(MAX) NOT NULL,
                           Continent NVARCHAR(50) NOT NULL,
-                          IsGlobal BIT NOT NULL
+                          IsGlobal BIT NOT NULL,
+                          PublishedAtUtc DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
 );
 GO
 
@@ -35,7 +37,8 @@ CREATE TABLE Articles (
                           Title NVARCHAR(200) NOT NULL,
                           Content NVARCHAR(MAX) NOT NULL,
                           Continent NVARCHAR(50) NOT NULL,
-                          IsGlobal BIT NOT NULL
+                          IsGlobal BIT NOT NULL,
+                          PublishedAtUtc DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
 );
 GO
 
@@ -45,7 +48,8 @@ CREATE TABLE Articles (
                           Title NVARCHAR(200) NOT NULL,
                           Content NVARCHAR(MAX) NOT NULL,
                           Continent NVARCHAR(50) NOT NULL,
-                          IsGlobal BIT NOT NULL
+                          IsGlobal BIT NOT NULL,
+                          PublishedAtUtc DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
 );
 GO
 
@@ -55,7 +59,8 @@ CREATE TABLE Articles (
                           Title NVARCHAR(200) NOT NULL,
                           Content NVARCHAR(MAX) NOT NULL,
                           Continent NVARCHAR(50) NOT NULL,
-                          IsGlobal BIT NOT NULL
+                          IsGlobal BIT NOT NULL,
+                          PublishedAtUtc DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
 );
 GO
 
@@ -65,7 +70,8 @@ CREATE TABLE Articles (
                           Title NVARCHAR(200) NOT NULL,
                           Content NVARCHAR(MAX) NOT NULL,
                           Continent NVARCHAR(50) NOT NULL,
-                          IsGlobal BIT NOT NULL
+                          IsGlobal BIT NOT NULL,
+                          PublishedAtUtc DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
 );
 GO
 
@@ -75,7 +81,8 @@ CREATE TABLE Articles (
                           Title NVARCHAR(200) NOT NULL,
                           Content NVARCHAR(MAX) NOT NULL,
                           Continent NVARCHAR(50) NOT NULL,
-                          IsGlobal BIT NOT NULL
+                          IsGlobal BIT NOT NULL,
+                          PublishedAtUtc DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
 );
 GO
 
@@ -85,6 +92,7 @@ CREATE TABLE Articles (
                           Title NVARCHAR(200) NOT NULL,
                           Content NVARCHAR(MAX) NOT NULL,
                           Continent NVARCHAR(50) NOT NULL,
-                          IsGlobal BIT NOT NULL
+                          IsGlobal BIT NOT NULL,
+                          PublishedAtUtc DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
 );
 GO

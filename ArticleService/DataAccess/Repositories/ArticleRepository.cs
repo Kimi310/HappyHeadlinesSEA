@@ -38,25 +38,29 @@ public class ArticleRepository : IArticleRepository
 
     public async Task<List<Article>> GetFromRegionAsync(string region)
     {
-        var isGlobal = false;
-        if (region == "Global")
-        {
-            isGlobal = true;
-        }
-        
+        var isGlobal = IsGlobalRegion(region);
         var context = _factory.Create(region, isGlobal);
         return await context.Articles.ToListAsync();
     }
 
+    public async Task<List<Article>> GetFromRegionSinceAsync(string region, DateTime sinceUtc, CancellationToken cancellationToken = default)
+    {
+        var isGlobal = IsGlobalRegion(region);
+        var context = _factory.Create(region, isGlobal);
+        return await context.Articles
+            .Where(article => article.PublishedAtUtc >= sinceUtc)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<Article> GetByIdAsync(Guid id, string region)
     {
-        var isGlobal = false;
-        if (region == "Global")
-        {
-            isGlobal = true;
-        }
-        
+        var isGlobal = IsGlobalRegion(region);
         var context = _factory.Create(region, isGlobal);
         return await context.Articles.FirstOrDefaultAsync(a => a.Id == id);
+    }
+
+    private static bool IsGlobalRegion(string region)
+    {
+        return string.Equals(region, "Global", StringComparison.OrdinalIgnoreCase);
     }
 }
