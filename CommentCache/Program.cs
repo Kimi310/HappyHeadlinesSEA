@@ -76,4 +76,10 @@ app.MapGet("/tracked-articles", async (ArticleTracker tracker) =>
     return Results.Ok(articleIds);
 });
 
+app.MapGet("/tracked-comments", async (CommentCacheService cache, Guid articleId) =>
+{
+    var comments = await cache.TryGetCommentsAsync(articleId);
+    return Results.Ok(comments);
+});
+
 app.Run();
