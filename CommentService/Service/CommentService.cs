@@ -65,7 +65,7 @@ public class CommentService : ICommentService
     public async Task<IEnumerable<Comment>> GetCommentsByArticleIdAsync(Guid articleId)
     {
         var isTracked = await IsArticleTrackedAsync(articleId);
-        
+
         if (!isTracked)
         {
             _logger.LogDebug("Article {ArticleId} not in tracked list - loading from database", articleId);
@@ -73,6 +73,14 @@ public class CommentService : ICommentService
         }
 
         _logger.LogInformation("Article {ArticleId} is tracked - attempting cache lookup", articleId);
+        var cachedComments = await TryGetCommentsAsync(articleId);
+
+        if (cachedComments is not null)
+        {
+            return cachedComments;
+        }
+
+        _logger.LogDebug("Article {ArticleId} cache miss - loading from database", articleId);
         return await _commentRepository.GetByArticleIdAsync(articleId);
     }
 
@@ -106,6 +114,38 @@ public class CommentService : ICommentService
         {
             _logger.LogWarning(ex, "Failed to check if article {ArticleId} is tracked - falling back to normal DB access", articleId);
             return false;
+        }
+    }
+    
+    
+    private async Task<List<Comment>?> TryGetCommentsAsync(Guid articleId)
+    {
+        try
+        {
+            var httpClient = _httpClientFactory.CreateClient();
+            httpClient.Timeout = TimeSpan.FromSeconds(4);
+
+            var response = await httpClient.GetAsync($"{_commentCacheUrl}/tracked-comments?articleId={articleId}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var comments = await response.Content.ReadFromJsonAsync<List<Comment>>();
+
+                if (comments is not null)
+                    _logger.LogDebug("Cache HIT for article {ArticleId}", articleId);
+                else
+                    _logger.LogDebug("Cache MISS for article {ArticleId}", articleId);
+
+                return comments;
+            }
+
+            _logger.LogWarning("CommentCache service returned {StatusCode} for article {ArticleId} - falling back to normal DB access", response.StatusCode, articleId);
+            return null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to get comments for article {ArticleId} from CommentCache - falling back to normal DB access", articleId);
+            return null;
         }
     }
 }
