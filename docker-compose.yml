@@ -62,6 +62,20 @@ services:
     restart: always
     networks:
       - app-network
+  
+  sqlserver-subscriber:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: subscriber-sqlserver
+    environment:
+      SA_PASSWORD: "YourStrong!Passw0rd"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1437:1433"
+    volumes:
+      - sqlvolume_subscriber:/var/opt/mssql
+    restart: always
+    networks:
+      - app-network
 
   # ---------------- DB INIT ----------------
 
@@ -117,6 +131,20 @@ services:
       /bin/bash -c "
       sleep 25 &&
       /opt/mssql-tools/bin/sqlcmd -S sqlserver-draft -U sa -P YourStrong!Passw0rd -i /init.sql
+      "
+    networks:
+      - app-network
+  
+  db-init-subscriber:
+    image: mcr.microsoft.com/mssql-tools
+    depends_on:
+      - sqlserver-subscriber
+    volumes:
+      - ./SubscriberInit.sql:/init.sql
+    entrypoint: >
+      /bin/bash -c "
+      sleep 25 &&
+      /opt/mssql-tools/bin/sqlcmd -S sqlserver-subscriber -U sa -P YourStrong!Passw0rd -i /init.sql
       "
     networks:
       - app-network
@@ -253,6 +281,23 @@ services:
       - "8084:80"
     depends_on:
       - sqlserver-profanity
+    networks:
+      - app-network
+  
+  subscriber-service:
+    build:
+      context: .
+      dockerfile: SubscriberService/Dockerfile
+    image: subscriber-service:latest
+    ports:
+      - "8086:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - SubscriberService__Url=http://subscriber-service:80
+      - SubscriberCache__Url=http://subscriber-cache:80
+    depends_on:
+      - sqlserver-subscriber
+      - subscriber-cache
     networks:
       - app-network
 
@@ -393,7 +438,7 @@ services:
     image: comment-cache:latest
     container_name: comment-cache
     ports:
-      - "8086:80"
+      - "8087:80"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - Redis__ConnectionString=redis:6379
@@ -413,6 +458,33 @@ services:
     networks:
       - app-network
   
+  comment-cache:
+    build:
+      context: .
+      dockerfile: SubscriberCache/Dockerfile
+    image: subscriber-cache:latest
+    container_name: subscriber-cache
+    ports:
+      - "8088:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Redis__ConnectionString=redis:6379
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__Port=5672
+      - RabbitMq__Username=subscriber_user
+      - RabbitMq__Password=subscriber_password
+      - RabbitMq__Exchange=subscriber.events
+      - RabbitMq__Queue=subscribercache.subscriber.queue
+      - RabbitMq__RoutingKey=subscriber.published
+      - Cache__MaxCachedArticles=30
+      - Cache__TtlMinutes=60
+    depends_on:
+      - redis
+      - rabbitmq
+    restart: always
+    networks:
+      - app-network
+  
   # env for redis
   # - Redis__Host=redis
   # - Redis__Port=6379
@@ -422,4 +494,5 @@ volumes:
   sqlvolume_comment:
   sqlvolume_profanity:
   sqlvolume_draft:
+  sqlvolume_subscriber:
   redisdata:

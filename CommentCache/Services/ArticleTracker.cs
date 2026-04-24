@@ -63,7 +63,7 @@ public class ArticleTracker
                 0, 
                 -1, 
                 Order.Descending);
-
+            
             return articleIds
                 .Select(id => Guid.TryParse((string?)id, out var guid) ? guid : Guid.Empty)
                 .Where(id => id != Guid.Empty)
