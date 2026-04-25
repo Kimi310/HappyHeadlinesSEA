@@ -24,7 +24,12 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NewsletterService", "NewsletterService\NewsletterService.csproj", "{59972788-E125-48E6-8218-AAA7EC67E284}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArticleCacheService", "ArticleCacheService\ArticleCacheService.csproj", "{A6E1C34F-9C3E-4F5C-BE42-7F20ACD09410}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommentCache", "CommentCache\CommentCache.csproj", "{F5C732AC-3182-426B-8DE9-4D89EB821410}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SubscriberService", "SubscriberService\SubscriberService.csproj", "{73C32D2F-2531-4CBA-96B2-89DE23906ABE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SubscriberCache", "SubscriberCache\SubscriberCache.csproj", "{7BB0B077-035D-4F26-A6D1-4260BC32F059}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -72,6 +77,14 @@ Global
 		{F5C732AC-3182-426B-8DE9-4D89EB821410}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F5C732AC-3182-426B-8DE9-4D89EB821410}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F5C732AC-3182-426B-8DE9-4D89EB821410}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73C32D2F-2531-4CBA-96B2-89DE23906ABE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73C32D2F-2531-4CBA-96B2-89DE23906ABE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73C32D2F-2531-4CBA-96B2-89DE23906ABE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73C32D2F-2531-4CBA-96B2-89DE23906ABE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7BB0B077-035D-4F26-A6D1-4260BC32F059}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7BB0B077-035D-4F26-A6D1-4260BC32F059}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7BB0B077-035D-4F26-A6D1-4260BC32F059}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7BB0B077-035D-4F26-A6D1-4260BC32F059}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection
