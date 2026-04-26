@@ -290,7 +290,7 @@ services:
       dockerfile: SubscriberService/Dockerfile
     image: subscriber-service:latest
     ports:
-      - "8086:80"
+      - "8089:80"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - SubscriberService__Url=http://subscriber-service:80
@@ -458,7 +458,7 @@ services:
     networks:
       - app-network
   
-  comment-cache:
+  subscriber-cache:
     build:
       context: .
       dockerfile: SubscriberCache/Dockerfile
