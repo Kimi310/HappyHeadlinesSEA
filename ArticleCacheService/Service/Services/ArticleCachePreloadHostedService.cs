@@ -7,15 +7,18 @@ namespace ArticleCacheService.Service.Services;
 public sealed class ArticleCachePreloadHostedService : BackgroundService
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;
+    private readonly CacheRuntimeState _runtimeState;
     private readonly ArticleCacheOptions _cacheOptions;
     private readonly ILogger<ArticleCachePreloadHostedService> _logger;
 
     public ArticleCachePreloadHostedService(
         IServiceScopeFactory serviceScopeFactory,
+        CacheRuntimeState runtimeState,
         IOptions<ArticleCacheOptions> cacheOptions,
         ILogger<ArticleCachePreloadHostedService> logger)
     {
         _serviceScopeFactory = serviceScopeFactory;
+        _runtimeState = runtimeState;
         _cacheOptions = cacheOptions.Value;
         _logger = logger;
     }
@@ -33,6 +36,12 @@ public sealed class ArticleCachePreloadHostedService : BackgroundService
 
     private async Task WarmUpAsync(CancellationToken cancellationToken)
     {
+        if (!_runtimeState.Enabled)
+        {
+            _logger.LogDebug("Cache disabled - skipping scheduled warmup");
+            return;
+        }
+
         try
         {
             using var scope = _serviceScopeFactory.CreateScope();

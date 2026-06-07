@@ -1,17 +1,32 @@
-﻿using ArticleCacheService.Service.Interfaces;
+﻿using ArticleCacheService.Service;
+using ArticleCacheService.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ArticleCacheService.Controllers;
 
 [ApiController]
 [Route("api/cache")]
-public class ArticleCacheController(IArticleCacheService articleCacheService) : ControllerBase
+public class ArticleCacheController(IArticleCacheService articleCacheService, CacheRuntimeState runtimeState) : ControllerBase
 {
     [HttpGet("articles/{region}")]
     public async Task<IActionResult> GetFromRegion([FromRoute] string region, CancellationToken cancellationToken)
     {
         var result = await articleCacheService.GetRegionArticlesAsync(region, cancellationToken);
         return Ok(result);
+    }
+
+    [HttpPost("mode")]
+    public IActionResult SetMode([FromQuery] bool enabled)
+    {
+        runtimeState.Enabled = enabled;
+        return Ok(new { cacheEnabled = runtimeState.Enabled });
+    }
+
+    [HttpPost("stats/reset")]
+    public async Task<IActionResult> ResetStats(CancellationToken cancellationToken)
+    {
+        await articleCacheService.ResetStatsAsync(cancellationToken);
+        return Ok(new { reset = true });
     }
 
     [HttpDelete("region/{region}")]

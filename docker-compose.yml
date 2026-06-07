@@ -204,6 +204,7 @@ services:
       - RabbitMq__Queue=article.published
       - RabbitMq__RoutingKey=article.published
       - ArticleCacheApi__BaseUrl=http://article-cache-service:80
+      - Compression__Enabled=true
     depends_on:
       - sqlserver-article
       - db-init-article
@@ -227,6 +228,7 @@ services:
       - RabbitMq__Queue=article.published
       - RabbitMq__RoutingKey=article.published
       - ArticleCacheApi__BaseUrl=http://article-cache-service:80
+      - Compression__Enabled=true
     depends_on:
       - sqlserver-article
       - rabbitmq
@@ -247,6 +249,8 @@ services:
       - Redis__Host=redis
       - Redis__Port=6379
       - ArticleCache__PreloadDays=14
+      - ArticleCache__Enabled=true
+      - Compression__Enabled=true
     depends_on:
       - sqlserver-article
       - db-init-article
