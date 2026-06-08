@@ -1,0 +1,39 @@
+# Step 8 - cache-service (AFTER - cache ON)
+# Fire the SAME reads as step 3. With the cache enabled and warm, these are
+# served from L1/L2 and should NOT hit SQL. Send the same number of requests
+# you sent in step 3 for a fair comparison.
+
+@cache = http://localhost:8086
+@region = Europe
+
+### read 1
+GET {{cache}}/api/cache/articles/{{region}}
+Accept: application/json
+
+### read 2
+GET {{cache}}/api/cache/articles/{{region}}
+Accept: application/json
+
+### read 3
+GET {{cache}}/api/cache/articles/{{region}}
+Accept: application/json
+
+### read 4
+GET {{cache}}/api/cache/articles/{{region}}
+Accept: application/json
+
+### read 5
+GET {{cache}}/api/cache/articles/{{region}}
+Accept: application/json
+
+### read 6
+GET {{cache}}/api/cache/articles/{{region}}
+Accept: application/json
+
+### read 7
+GET {{cache}}/api/cache/articles/{{region}}
+Accept: application/json
+
+### read 8
+GET {{cache}}/api/cache/articles/{{region}}
+Accept: application/json

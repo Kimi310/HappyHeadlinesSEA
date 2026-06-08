@@ -1,0 +1,39 @@
+# Step 0 (optional) - publisher-service
+# Publish a few Europe articles so the cache has real data to return.
+# This makes the compression comparison (steps 10/11) meaningful.
+# Goes through RabbitMQ -> ArticleService -> EuropeDB. Give it a few seconds.
+
+@publisher = http://localhost:5203
+
+### Seed article 1
+POST {{publisher}}/publishArticle
+Content-Type: application/json
+
+{
+  "title": "Europe edges toward a greener grid",
+  "content": "European operators reported record renewable output this quarter, with several countries running entire days on low-carbon sources. Analysts say efficiency gains in software and data centres are now a measurable part of national energy planning, and that demand-shaping at the application layer is becoming as important as adding generation capacity.",
+  "continent": "Europe",
+  "isGlobal": false
+}
+
+### Seed article 2
+POST {{publisher}}/publishArticle
+Content-Type: application/json
+
+{
+  "title": "Caching cuts data-centre load in benchmark study",
+  "content": "A new study measured how aggressive read caching reduces database CPU under steady traffic. Across the tested workloads, serving hot reads from memory removed the majority of repeated queries, lowering both latency and energy draw. The authors frame caching as a first-class sustainability tactic, not merely a performance trick.",
+  "continent": "Europe",
+  "isGlobal": false
+}
+
+### Seed article 3
+POST {{publisher}}/publishArticle
+Content-Type: application/json
+
+{
+  "title": "Event-driven design trims redundant work",
+  "content": "Engineers describe migrating from synchronous fan-out calls to an event-driven model, where consumers act only when a message arrives. The change removed busy-waiting and duplicated requests, and made it straightforward to scale individual consumers to match demand rather than over-provisioning the whole system for peak.",
+  "continent": "Europe",
+  "isGlobal": false
+}

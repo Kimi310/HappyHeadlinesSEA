@@ -1,0 +1,9 @@
+# Step 2 - cache-service
+# Zero the metric counters so the BEFORE measurement starts clean.
+
+@cache = http://localhost:8086
+
+### Reset stats
+POST {{cache}}/api/cache/stats/reset
+
+# Expected response: { "reset": true }

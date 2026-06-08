@@ -1,0 +1,16 @@
+# Step 10 - cache-service (Tactic B - compression baseline)
+# Fetch the article payload WITHOUT compression.
+# Accept-Encoding: identity tells the server NOT to gzip.
+# Note the response SIZE shown by your HTTP client - this is the baseline.
+
+@cache = http://localhost:8086
+@region = Europe
+
+### Uncompressed read
+GET {{cache}}/api/cache/articles/{{region}}
+Accept: application/json
+Accept-Encoding: identity
+
+# What to look for:
+#   - NO "Content-Encoding" header in the response
+#   - the response size = the full, uncompressed payload

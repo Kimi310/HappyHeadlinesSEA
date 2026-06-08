@@ -1,0 +1,15 @@
+# Step 4 - cache-service
+# Capture the BEFORE numbers.
+
+@cache = http://localhost:8086
+
+### Get stats (BEFORE)
+GET {{cache}}/api/cache/stats
+Accept: application/json
+
+# What to look for (cache was OFF):
+#   "dbQueries"        ~= the number of reads you sent in step 3
+#   "dbQueriesAvoided" == 0
+#   "avgLatencyMs"     == the un-cached read latency (higher)
+#   "cacheEnabled"     == false
+# Write these down to compare against step 9.

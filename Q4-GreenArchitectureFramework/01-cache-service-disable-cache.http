@@ -1,0 +1,10 @@
+# Step 1 - cache-service
+# Turn the cache OFF. This starts the BEFORE baseline: every read now goes
+# straight to SQL, so we can measure the un-cached DB load.
+
+@cache = http://localhost:8086
+
+### Disable the cache
+POST {{cache}}/api/cache/mode?enabled=false
+
+# Expected response: { "cacheEnabled": false }

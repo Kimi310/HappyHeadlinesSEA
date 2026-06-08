@@ -1,0 +1,9 @@
+# Step 5 - cache-service
+# Turn the cache ON. This starts the AFTER measurement.
+
+@cache = http://localhost:8086
+
+### Enable the cache
+POST {{cache}}/api/cache/mode?enabled=true
+
+# Expected response: { "cacheEnabled": true }
