@@ -120,6 +120,8 @@ function Show-Report($before, $after, $plain, $gzip) {
 Write-Host "GAF demo - phase=$Phase, region=$Region, requests=$N, base=$Base" -ForegroundColor Cyan
 Test-Reachable
 
+try {
+
 if ($Phase -eq "before") {
     Invoke-BeforePhase | Out-Null
     Write-Host "`nBefore-phase result saved to: $stateFile" -ForegroundColor DarkGray
@@ -151,3 +153,9 @@ $plain = Get-WireBytes "identity"
 $gzip = Get-WireBytes "gzip"
 
 Show-Report $before $after $plain $gzip
+
+}
+finally {
+    # Restore the default (cache enabled) so this run does not affect later runs.
+    try { Set-Mode $true | Out-Null } catch {}
+}
