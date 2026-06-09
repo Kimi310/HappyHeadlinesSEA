@@ -69,7 +69,7 @@ jobs:
         id: img
         run: echo "name=$(echo '${{ env.IMAGE_PREFIX }}/${{ matrix.service }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
 
-      - name: Build & push (tag: latest + git SHA, FMEA #9)
+      - name: Build & push (tag: latest + git SHA, FMEA )
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -94,7 +94,6 @@ jobs:
         run: |
           sleep 45
           docker compose ps
-          # przykladowa weryfikacja health-checkow (FMEA #5)
           curl -fsS http://localhost:80/health || true
 
       - name: Tear down
