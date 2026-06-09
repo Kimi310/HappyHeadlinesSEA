@@ -15,11 +15,28 @@ param(
     [string]$Lb = "http://localhost:80",
     [string]$Region = "Europe",
     [int]$N = 30,
-    [string]$Instance = "happyheadlinessea-article-service-1"
+    # Compose service name (resolved to the real container below). You can also
+    # pass an explicit container name to override auto-detection.
+    [string]$InstanceService = "article-service",
+    [string]$Instance
 )
 
 $ErrorActionPreference = "Stop"
 $url = "$Lb/api/article/get/$Region"
+
+# Resolve the actual container name from its docker compose service label so the
+# script works regardless of the compose project prefix (folder name).
+function Resolve-ComposeContainer([string]$service, [string]$explicit) {
+    if ($explicit) { return $explicit }
+    $name = docker ps -a --filter "label=com.docker.compose.service=$service" --format "{{.Names}}" |
+        Select-Object -First 1
+    if (-not $name) {
+        throw "No container found for compose service '$service'. Is the stack running? Try: docker compose up -d"
+    }
+    return $name
+}
+$Instance = Resolve-ComposeContainer $InstanceService $Instance
+Write-Host "Using article-service instance container: $Instance" -ForegroundColor DarkGray
 
 function Measure-Availability([int]$count) {
     $ok = 0; $fail = 0

@@ -14,13 +14,30 @@
 #>
 param(
     [string]$CommentBase = "http://localhost:8083",
-    [string]$ProfanityContainer = "happyheadlinessea-profanity-service-1",
+    # Compose service name (resolved to the real container below). You can also
+    # pass an explicit container name to override auto-detection.
+    [string]$ProfanityService = "profanity-service",
+    [string]$ProfanityContainer,
     [int]$TripCount = 5,
     [int]$RecoverySeconds = 20
 )
 
 $ErrorActionPreference = "Stop"
 $articleId = [guid]::NewGuid().Guid
+
+# Resolve the actual container name from its docker compose service label so the
+# script works regardless of the compose project prefix (folder name).
+function Resolve-ComposeContainer([string]$service, [string]$explicit) {
+    if ($explicit) { return $explicit }
+    $name = docker ps -a --filter "label=com.docker.compose.service=$service" --format "{{.Names}}" |
+        Select-Object -First 1
+    if (-not $name) {
+        throw "No container found for compose service '$service'. Is the stack running? Try: docker compose up -d"
+    }
+    return $name
+}
+$ProfanityContainer = Resolve-ComposeContainer $ProfanityService $ProfanityContainer
+Write-Host "Using ProfanityService container: $ProfanityContainer" -ForegroundColor DarkGray
 
 function Get-BreakerState {
     try { return (Invoke-RestMethod "$CommentBase/api/comment/breaker-state").state } catch { return "unknown" }
