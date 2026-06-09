@@ -1,3 +1,4 @@
+using System.IO.Compression;
 using ArticleService.DataAccess;
 using ArticleService.DataAccess.Interfaces;
 using ArticleService.DataAccess.Repositories;
@@ -6,6 +7,7 @@ using ArticleService.Options;
 using ArticleService.Service.Clients;
 using ArticleService.Service.Interfaces;
 using DataAccess;
+using Microsoft.AspNetCore.ResponseCompression;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
@@ -13,6 +15,20 @@ using OpenTelemetry.Trace;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSwaggerGen();
+
+var compressionEnabled = builder.Configuration.GetValue("Compression:Enabled", true);
+if (compressionEnabled)
+{
+    builder.Services.AddResponseCompression(options =>
+    {
+        options.EnableForHttps = true;
+        options.Providers.Add<GzipCompressionProvider>();
+        options.Providers.Add<BrotliCompressionProvider>();
+        options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/json" });
+    });
+    builder.Services.Configure<GzipCompressionProviderOptions>(o => o.Level = CompressionLevel.Fastest);
+    builder.Services.Configure<BrotliCompressionProviderOptions>(o => o.Level = CompressionLevel.Fastest);
+}
 builder.Services.Configure<DatabaseOptions>(
     builder.Configuration.GetSection("ConnectionStrings"));
 builder.Services.Configure<RabbitMqOptions>(
@@ -56,6 +72,11 @@ builder.Services.AddOpenTelemetry()
 
 builder.Services.AddControllers();
 var app = builder.Build();
+
+if (compressionEnabled)
+{
+    app.UseResponseCompression();
+}
 
 app.UseSwagger();
 app.UseSwaggerUI();

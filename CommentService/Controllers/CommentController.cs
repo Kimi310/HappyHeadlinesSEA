@@ -1,3 +1,4 @@
+using CommentService.Resilience;
 using CommentService.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,10 +9,18 @@ namespace CommentService.Controllers;
 public class CommentController : ControllerBase
 {
     private readonly ICommentService _commentService;
+    private readonly ProfanityCircuitBreaker _profanityCircuitBreaker;
 
-    public CommentController(ICommentService commentService)
+    public CommentController(ICommentService commentService, ProfanityCircuitBreaker profanityCircuitBreaker)
     {
         _commentService = commentService;
+        _profanityCircuitBreaker = profanityCircuitBreaker;
+    }
+
+    [HttpGet("breaker-state")]
+    public IActionResult GetBreakerState()
+    {
+        return Ok(new { state = _profanityCircuitBreaker.State.ToString() });
     }
 
     [HttpPost]

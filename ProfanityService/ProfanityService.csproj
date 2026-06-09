@@ -21,4 +21,12 @@
       <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="8.1.4" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Chaos\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="Chaos\FailureSwitch.cs" />
+    </ItemGroup>
+
 </Project>

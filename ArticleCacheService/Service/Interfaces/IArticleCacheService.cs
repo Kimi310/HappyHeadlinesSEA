@@ -9,5 +9,6 @@ public interface IArticleCacheService
     Task InvalidateRegionAsync(string region, CancellationToken cancellationToken = default);
     Task WarmRecentArticlesAsync(CancellationToken cancellationToken = default);
     Task<ArticleCacheStatsSnapshot> GetStatsAsync(CancellationToken cancellationToken = default);
+    Task ResetStatsAsync(CancellationToken cancellationToken = default);
 }
 

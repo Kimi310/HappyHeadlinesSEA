@@ -1,6 +1,8 @@
 using CommentService.DataAccess.Interfaces;
+using CommentService.Resilience;
 using CommentService.Service.Interfaces;
 using CommentService.DataAccess.Models;
+using Polly.CircuitBreaker;
 
 namespace CommentService.Service;
 
@@ -8,25 +10,28 @@ public class CommentService : ICommentService
 {
     private readonly ICommentRepository _commentRepository;
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly ProfanityCircuitBreaker _profanityCircuitBreaker;
     private readonly ILogger<CommentService> _logger;
     private readonly string _profanityApiUrl;
     private readonly string _commentCacheUrl;
-    
+
     public CommentService(
-        ICommentRepository commentRepository, 
-        IHttpClientFactory httpClientFactory, 
+        ICommentRepository commentRepository,
+        IHttpClientFactory httpClientFactory,
+        ProfanityCircuitBreaker profanityCircuitBreaker,
         IConfiguration configuration,
         ILogger<CommentService> logger)
     {
         _commentRepository = commentRepository;
         _httpClientFactory = httpClientFactory;
+        _profanityCircuitBreaker = profanityCircuitBreaker;
         _logger = logger;
-        _profanityApiUrl = configuration["ProfanityService:Url"] 
+        _profanityApiUrl = configuration["ProfanityService:Url"]
             ?? throw new InvalidOperationException("ProfanityService:Url configuration is missing");
-        _commentCacheUrl = configuration["CommentCache:Url"] 
+        _commentCacheUrl = configuration["CommentCache:Url"]
             ?? "http://comment-cache:80";
     }
-    
+
     public async Task<Comment> CreateCommentAsync(Guid articleId, string commentText)
     {
         if (string.IsNullOrWhiteSpace(commentText))
@@ -34,32 +39,53 @@ public class CommentService : ICommentService
             throw new ArgumentException("Comment text cannot be empty", nameof(commentText));
         }
 
-        var httpClient = _httpClientFactory.CreateClient();
-    
-        var requestBody = new
-        {
-            text = commentText,
-            replacementChar = '*'
-        };
-
-        var response = await httpClient.PostAsJsonAsync($"{_profanityApiUrl}/api/profanity/filter", requestBody);
-        response.EnsureSuccessStatusCode();
-    
-        var result = await response.Content.ReadFromJsonAsync<FilterResponse>();
-    
-        var wasFiltered = result.FilteredText != commentText;
+        var content = await FilterCommentAsync(commentText);
 
         var comment = new Comment
         {
             Id = Guid.NewGuid(),
             ArticleId = articleId,
-            Content = wasFiltered ? result.FilteredText : commentText,
+            Content = content,
             CreatedAt = DateTime.UtcNow
         };
 
         await _commentRepository.CreateAsync(comment);
 
         return comment;
+    }
+
+    private async Task<string> FilterCommentAsync(string commentText)
+    {
+        var requestBody = new
+        {
+            text = commentText,
+            replacementChar = '*'
+        };
+
+        try
+        {
+            var response = await _profanityCircuitBreaker.ExecuteAsync(() =>
+            {
+                var httpClient = _httpClientFactory.CreateClient();
+                httpClient.Timeout = TimeSpan.FromSeconds(4);
+                return httpClient.PostAsJsonAsync($"{_profanityApiUrl}/api/profanity/filter", requestBody);
+            });
+
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<FilterResponse>();
+            return result?.FilteredText ?? commentText;
+        }
+        catch (BrokenCircuitException)
+        {
+            _logger.LogWarning("Profanity circuit is open - storing comment without filtering");
+            return commentText;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Profanity filtering failed - storing comment without filtering");
+            return commentText;
+        }
     }
     
     public async Task<IEnumerable<Comment>> GetCommentsByArticleIdAsync(Guid articleId)

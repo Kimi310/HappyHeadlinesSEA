@@ -1,0 +1,39 @@
+# Step 3 - cache-service (BEFORE - cache OFF)
+# Fire several reads. With the cache disabled, EACH of these hits the SQL
+# database. Click "Send Request" on every block (or re-send a few times) to
+# build up a DB-query count.
+
+@cache = http://localhost:8086
+@region = Europe
+
+### read 1
+GET {{cache}}/api/cache/articles/{{region}}
+Accept: application/json
+
+### read 2
+GET {{cache}}/api/cache/articles/{{region}}
+Accept: application/json
+
+### read 3
+GET {{cache}}/api/cache/articles/{{region}}
+Accept: application/json
+
+### read 4
+GET {{cache}}/api/cache/articles/{{region}}
+Accept: application/json
+
+### read 5
+GET {{cache}}/api/cache/articles/{{region}}
+Accept: application/json
+
+### read 6
+GET {{cache}}/api/cache/articles/{{region}}
+Accept: application/json
+
+### read 7
+GET {{cache}}/api/cache/articles/{{region}}
+Accept: application/json
+
+### read 8
+GET {{cache}}/api/cache/articles/{{region}}
+Accept: application/json

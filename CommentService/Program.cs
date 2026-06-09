@@ -1,6 +1,7 @@
 using CommentService.DataAccess;
 using CommentService.DataAccess.Interfaces;
 using CommentService.DataAccess.Repositories;
+using CommentService.Resilience;
 using CommentService.Service.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +13,7 @@ builder.Services.Configure<DatabaseOptions>(
 builder.Services.AddScoped<ICommentDbContextFactory, CommentDbContextFactory>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<ICommentService, CommentService.Service.CommentService>();
+builder.Services.AddSingleton<ProfanityCircuitBreaker>();
 builder.Services.AddControllers();
 builder.Services.AddHttpClient();
 var app = builder.Build();

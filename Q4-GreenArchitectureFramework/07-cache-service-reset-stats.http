@@ -1,0 +1,10 @@
+# Step 7 - cache-service
+# Zero the counters again so the AFTER measurement starts clean
+# (excluding the one-time warmup in step 6).
+
+@cache = http://localhost:8086
+
+### Reset stats
+POST {{cache}}/api/cache/stats/reset
+
+# Expected response: { "reset": true }

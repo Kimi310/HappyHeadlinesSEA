@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Diagnostics;
+using System.Text.Json;
 using ArticleCacheService.DataAccess.Interfaces;
 using ArticleCacheService.DataAccess.Models;
 using ArticleCacheService.Options;
@@ -40,6 +41,7 @@ public sealed class ArticleCacheService : IArticleCacheService
     private readonly IDistributedCache _distributedCache;
     private readonly IArticleRepository _articleRepository;
     private readonly IArticleCacheMetricsStore _metricsStore;
+    private readonly CacheRuntimeState _runtimeState;
     private readonly ArticleCacheOptions _cacheOptions;
     private readonly ILogger<ArticleCacheService> _logger;
 
@@ -48,6 +50,7 @@ public sealed class ArticleCacheService : IArticleCacheService
         IDistributedCache distributedCache,
         IArticleRepository articleRepository,
         IArticleCacheMetricsStore metricsStore,
+        CacheRuntimeState runtimeState,
         IOptions<ArticleCacheOptions> cacheOptions,
         ILogger<ArticleCacheService> logger)
     {
@@ -55,14 +58,42 @@ public sealed class ArticleCacheService : IArticleCacheService
         _distributedCache = distributedCache;
         _articleRepository = articleRepository;
         _metricsStore = metricsStore;
+        _runtimeState = runtimeState;
         _cacheOptions = cacheOptions.Value;
         _logger = logger;
     }
 
     public async Task<IReadOnlyList<Article>> GetRegionArticlesAsync(string region, CancellationToken cancellationToken = default)
     {
+        var stopwatch = Stopwatch.StartNew();
+        var completed = false;
+        try
+        {
+            var result = await GetRegionArticlesCoreAsync(region, cancellationToken);
+            completed = true;
+            return result;
+        }
+        finally
+        {
+            stopwatch.Stop();
+            if (completed)
+            {
+                await _metricsStore.RecordLatencyAsync(stopwatch.Elapsed.TotalMilliseconds, cancellationToken);
+            }
+        }
+    }
+
+    private async Task<IReadOnlyList<Article>> GetRegionArticlesCoreAsync(string region, CancellationToken cancellationToken)
+    {
         var normalizedRegion = NormalizeRegion(region);
         var cacheKey = BuildCacheKey(normalizedRegion);
+        var recentCutoffUtc = DateTime.UtcNow.AddDays(-Math.Max(_cacheOptions.PreloadDays, 1));
+
+        if (!_runtimeState.Enabled)
+        {
+            await _metricsStore.RecordDbQueryAsync(normalizedRegion, cancellationToken);
+            return await _articleRepository.GetFromRegionSinceAsync(normalizedRegion, recentCutoffUtc, cancellationToken);
+        }
 
         if (_memoryCache.TryGetValue<IReadOnlyList<Article>>(cacheKey, out var l1Articles) && l1Articles is not null)
         {
@@ -94,7 +125,7 @@ public sealed class ArticleCacheService : IArticleCacheService
             _logger.LogWarning(ex, "Failed to read L2 cache for region {Region}", normalizedRegion);
         }
 
-        var recentCutoffUtc = DateTime.UtcNow.AddDays(-Math.Max(_cacheOptions.PreloadDays, 1));
+        await _metricsStore.RecordDbQueryAsync(normalizedRegion, cancellationToken);
         var freshArticles = await _articleRepository.GetFromRegionSinceAsync(normalizedRegion, recentCutoffUtc, cancellationToken);
         await SetBothLayersAsync(cacheKey, freshArticles, cancellationToken);
         return freshArticles;
@@ -102,7 +133,13 @@ public sealed class ArticleCacheService : IArticleCacheService
 
     public async Task<ArticleCacheStatsSnapshot> GetStatsAsync(CancellationToken cancellationToken = default)
     {
-        return await _metricsStore.GetSnapshotAsync(cancellationToken);
+        var snapshot = await _metricsStore.GetSnapshotAsync(cancellationToken);
+        return snapshot with { CacheEnabled = _runtimeState.Enabled };
+    }
+
+    public Task ResetStatsAsync(CancellationToken cancellationToken = default)
+    {
+        return _metricsStore.ResetAsync(cancellationToken);
     }
 
     public async Task InvalidateRegionAsync(string region, CancellationToken cancellationToken = default)

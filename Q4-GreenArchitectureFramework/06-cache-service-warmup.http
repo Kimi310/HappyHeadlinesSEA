@@ -1,0 +1,11 @@
+# Step 6 - cache-service
+# Preload the cache so the AFTER reads are served from L1/L2.
+# (This warmup does the DB work once, up front; we reset the counters after it
+# in step 7 so the AFTER measurement reflects only the cached read traffic.)
+
+@cache = http://localhost:8086
+
+### Warm up the cache
+POST {{cache}}/api/cache/warmup
+
+# Expected: 200 OK

@@ -1,0 +1,21 @@
+# Step 11 - cache-service (Tactic B - compressed)
+# Fetch the SAME payload WITH gzip and compare against step 10.
+
+@cache = http://localhost:8086
+@region = Europe
+
+### Gzipped read
+GET {{cache}}/api/cache/articles/{{region}}
+Accept: application/json
+Accept-Encoding: gzip
+
+# What to look for:
+#   - response header "Content-Encoding: gzip"  <- proof the server compressed it
+#   - smaller bytes-on-the-wire than step 10 (less network = greener)
+#
+# Note: some HTTP clients auto-decompress and then display the FULL size, so the
+# size readout may look the same even though the transfer was compressed. The
+# reliable proof in-client is the "Content-Encoding: gzip" header. For exact
+# byte-for-byte numbers, use scripts/gaf-demo.ps1 (it measures with curl), e.g.:
+#   curl -s -o NUL -w "%{size_download}" -H "Accept-Encoding: identity" {{cache}}/api/cache/articles/{{region}}
+#   curl -s -o NUL -w "%{size_download}" -H "Accept-Encoding: gzip"     {{cache}}/api/cache/articles/{{region}}

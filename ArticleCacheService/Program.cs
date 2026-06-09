@@ -1,10 +1,13 @@
 ﻿using ArticleCacheService.DataAccess;
 using ArticleCacheService.DataAccess.Interfaces;
 using ArticleCacheService.DataAccess.Repositories;
+using System.IO.Compression;
 using ArticleCacheService.Options;
+using ArticleCacheService.Service;
 using ArticleCacheService.Service.Interfaces;
 using ArticleCacheService.Service.Services;
 using ArticleCacheService.Service.Telemetry;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 
@@ -16,6 +19,23 @@ builder.Services.AddControllers();
 builder.Services.Configure<DatabaseOptions>(builder.Configuration.GetSection("ConnectionStrings"));
 builder.Services.Configure<RedisOptions>(builder.Configuration.GetSection(RedisOptions.SectionName));
 builder.Services.Configure<ArticleCacheOptions>(builder.Configuration.GetSection(ArticleCacheOptions.SectionName));
+
+var cacheOptions = builder.Configuration.GetSection(ArticleCacheOptions.SectionName).Get<ArticleCacheOptions>() ?? new ArticleCacheOptions();
+builder.Services.AddSingleton(new CacheRuntimeState(cacheOptions.Enabled));
+
+var compressionEnabled = builder.Configuration.GetValue("Compression:Enabled", true);
+if (compressionEnabled)
+{
+    builder.Services.AddResponseCompression(options =>
+    {
+        options.EnableForHttps = true;
+        options.Providers.Add<GzipCompressionProvider>();
+        options.Providers.Add<BrotliCompressionProvider>();
+        options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/json" });
+    });
+    builder.Services.Configure<GzipCompressionProviderOptions>(o => o.Level = CompressionLevel.Fastest);
+    builder.Services.Configure<BrotliCompressionProviderOptions>(o => o.Level = CompressionLevel.Fastest);
+}
 
 var redisOptions = builder.Configuration.GetSection(RedisOptions.SectionName).Get<RedisOptions>() ?? new RedisOptions();
 
@@ -34,6 +54,11 @@ builder.Services.AddSingleton<IArticleCacheMetricsStore, RedisArticleCacheMetric
 builder.Services.AddHostedService<ArticleCachePreloadHostedService>();
 
 var app = builder.Build();
+
+if (compressionEnabled)
+{
+    app.UseResponseCompression();
+}
 
 app.UseSwagger();
 app.UseSwaggerUI();
